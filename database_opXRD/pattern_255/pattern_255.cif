@@ -1,0 +1,38 @@
+# generated using pymatgen
+data_Na2MgFe(CN)6
+_symmetry_space_group_name_H-M   P2_1/c
+_cell_length_a   7.28416000
+_cell_length_b   7.47537000
+_cell_length_c   12.53991077
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   123.74530542
+_cell_angle_gamma   90.00000000
+_symmetry_Int_Tables_number   14
+_chemical_formula_structural   Na2MgFe(CN)6
+_chemical_formula_sum   'Na4 Mg2 Fe2 C12 N12'
+_cell_volume   567.77566225
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-x, -y, -z'
+  3  '-x, y+1/2, -z+1/2'
+  4  'x, -y+1/2, z+1/2'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Na  Na0  4  0.23570000  0.04610000  0.74760000  1.0
+  Mg  Mg1  2  0.00000000  0.00000000  0.00000000  1.0
+  Fe  Fe2  2  0.50000000  0.00000000  0.50000000  1.0
+  C  C3  4  0.29250000  0.66960000  0.97300000  1.0
+  C  C4  4  0.31400000  0.21460000  0.48200000  1.0
+  C  C5  4  0.32050000  0.54590000  0.79250000  1.0
+  N  N6  4  0.17900000  0.50800000  0.72000000  1.0
+  N  N7  4  0.21920000  0.20910000  0.01080000  1.0
+  N  N8  4  0.24570000  0.72040000  0.50040000  1.0

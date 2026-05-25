@@ -1,0 +1,303 @@
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/pymatgen/symmetry/analyzer.py:130: DeprecationWarning: dict interface is deprecated. Use attribute interface instead
+  return self._space_group_data["international"]
+📄 实验数据：/home/dataset-assist-0/Three-stage-refinement/precursor/benchmark_run/NiO_0p6007-Bi2O3_0p4008--8min/sample.xy
+🔍 候选杂质相：1 个
+
+🏷️ Top 候选：
+   Bi2O3.cif                    corr=0.352
+
+🖥️ 设备：cuda
+• 组合 main.cif                                                     → Rwp= 22.59% 
+• 组合 main.cif + Bi2O3.cif                                         → Rwp= 20.69% 
+
+✅ 初选最佳组合： main.cif + Bi2O3.cif
+   初选 Rwp = 20.69% 
+📌 已冻结 Wyckoff 分组：
+   main.cif: 2 组
+   Bi2O3.cif: 5 组
+
+🔁 外层精修启动：Rwp=21.18% |  score=21.18
+
+🚀 进入阶段：粗调 (Stage 1) | loops=60 
+
+▶️ 粗调 (Stage 1) StepA：结构拟合阶段（λ_stoich=0.0）
+✅ StepA 完成：Rwp=20.99% | score=20.99
+粗调 (Stage 1) StepB：化学计量修正（λ_stoich=0.5)
+
+📘 [StoichPenalty] λ_stoich = 0.500
+👉 已识别主相为：main.cif
+🧩 各相的化学计量约束权重：
+   ├─ main.cif                  | 类型: 主相  | λ_phase = 0.050
+   ├─ Bi2O3.cif                 | 类型: 杂相  | λ_phase = 0.400
+-------------------------------------------------------
+✅ StepB 完成：Rwp=22.36% | score=22.36
+[粗调 (Stage 1) | StepB | A-Loop 001] ✅ cell main.cif.a -0.375% → Rwp=20.37% | score=20.37
+[粗调 (Stage 1) | StepB | A-Loop 001] ✅ cell Bi2O3.cif.a -0.375% → Rwp=20.23% | score=20.23
+[粗调 (Stage 1) | A-Loop 001| StepB] ✅ angle Bi2O3.cif.alpha -0.450° → Rwp=19.86% | score=19.86
+[粗调 (Stage 1) | A-Loop 001| StepB] ✅ angle Bi2O3.cif.gamma -0.450° → Rwp=19.63% | score=19.63
+[粗调 (Stage 1) | A-Loop 001] ✅ TCH U -27.0% → Rwp=19.63% | score=19.63
+[粗调 (Stage 1) | A-Loop 001] ✅ TCH W +27.0% → Rwp=19.58% | score=19.58
+[粗调 (Stage 1) | A-Loop 001] ✅ TCH X +27.0% → Rwp=19.41% | score=19.41
+[粗调 (Stage 1) | A-Loop 001] ✅ TCH Y +27.0% → Rwp=19.38% | score=19.38
+[粗调 (Stage 1) | StepB | A-Loop 002] ✅ cell main.cif.a -0.375% → Rwp=19.00% | score=19.00
+[粗调 (Stage 1) | StepB | A-Loop 002] ✅ cell main.cif.b -0.375% → Rwp=18.70% | score=18.70
+[粗调 (Stage 1) | StepB | A-Loop 002] ✅ cell Bi2O3.cif.a -0.375% → Rwp=18.32% | score=18.32
+[粗调 (Stage 1) | A-Loop 002] ✅ TCH W +27.0% → Rwp=18.24% | score=18.24
+[粗调 (Stage 1) | A-Loop 002] ✅ TCH X +27.0% → Rwp=18.02% | score=18.02
+[粗调 (Stage 1) | A-Loop 002] ✅ TCH Y +27.0% → Rwp=17.99% | score=17.99
+[粗调 (Stage 1) | A-Loop 002] ✅ PO r main.cif → r=1.400 | Rwp=17.77% | score=17.77
+[粗调 (Stage 1) | StepB | A-Loop 003] ✅ cell main.cif.a -0.375% → Rwp=16.16% | score=16.16
+[粗调 (Stage 1) | StepB | A-Loop 003] ✅ cell Bi2O3.cif.a -0.375% → Rwp=15.99% | score=15.99
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH U +27.0% → Rwp=15.99% | score=15.99
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH W +27.0% → Rwp=15.78% | score=15.78
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH X +27.0% → Rwp=15.38% | score=15.38
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH Y +27.0% → Rwp=15.32% | score=15.32
+[粗调 (Stage 1) | A-Loop 003] ✅ PO r main.cif → r=1.960 | Rwp=15.28% | score=15.28
+[粗调 (Stage 1) | StepB | A-Loop 004] ✅ cell Bi2O3.cif.a -0.375% → Rwp=15.05% | score=15.05
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH U +27.0% → Rwp=15.05% | score=15.05
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH V +27.0% → Rwp=15.04% | score=15.04
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH W +27.0% → Rwp=14.80% | score=14.80
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH X +27.0% → Rwp=14.34% | score=14.34
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH Y +27.0% → Rwp=14.25% | score=14.25
+[粗调 (Stage 1) | A-Loop 005| StepB] ✅ angle Bi2O3.cif.alpha -0.450° → Rwp=14.25% | score=14.25
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH U +27.0% → Rwp=14.25% | score=14.25
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH V +27.0% → Rwp=14.25% | score=14.25
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH W +27.0% → Rwp=13.98% | score=13.98
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH X +27.0% → Rwp=13.52% | score=13.52
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH Y +27.0% → Rwp=13.41% | score=13.41
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH U +27.0% → Rwp=13.41% | score=13.41
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH V +27.0% → Rwp=13.41% | score=13.41
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH W +27.0% → Rwp=13.16% | score=13.16
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH X +27.0% → Rwp=12.70% | score=12.70
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH Y +27.0% → Rwp=12.62% | score=12.62
+[粗调 (Stage 1) | StepB | A-Loop 007] ✅ cell Bi2O3.cif.c -0.375% → Rwp=12.52% | score=12.52
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH U +27.0% → Rwp=12.52% | score=12.52
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH V +27.0% → Rwp=12.51% | score=12.51
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH W +27.0% → Rwp=12.25% | score=12.25
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH X +27.0% → Rwp=11.80% | score=11.80
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH Y +27.0% → Rwp=11.73% | score=11.73
+[粗调 (Stage 1) | StepB | A-Loop 008] ✅ cell main.cif.a -0.375% → Rwp=11.65% | score=11.65
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH U +27.0% → Rwp=11.64% | score=11.64
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH V +27.0% → Rwp=11.64% | score=11.64
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH W +27.0% → Rwp=11.34% | score=11.34
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH X +27.0% → Rwp=11.09% | score=11.09
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH Y +27.0% → Rwp=11.07% | score=11.07
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH U +27.0% → Rwp=11.05% | score=11.05
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH W +27.0% → Rwp=10.98% | score=10.98
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH X +27.0% → Rwp=10.95% | score=10.95
+[粗调 (Stage 1) | StepB | A-Loop 010] ✅ cell main.cif.a +0.375% → Rwp=10.92% | score=10.92
+[粗调 (Stage 1) | StepB | A-Loop 010] ✅ cell Bi2O3.cif.a +0.375% → Rwp=10.89% | score=10.89
+[粗调 (Stage 1) | A-Loop 010] ✅ TCH U +27.0% → Rwp=10.88% | score=10.88
+[粗调 (Stage 1) | A-Loop 010] ✅ TCH Y +27.0% → Rwp=10.83% | score=10.83
+[粗调 (Stage 1) | StepB | A-Loop 011] ✅ cell main.cif.b -0.375% → Rwp=10.51% | score=10.51
+[粗调 (Stage 1) | StepB | A-Loop 011] ✅ cell Bi2O3.cif.a -0.375% → Rwp=10.51% | score=10.51
+[粗调 (Stage 1) | A-Loop 011] ✅ TCH U +27.0% → Rwp=10.50% | score=10.50
+[粗调 (Stage 1) | A-Loop 011] ✅ TCH V +27.0% → Rwp=10.50% | score=10.50
+[粗调 (Stage 1) | A-Loop 011] ✅ TCH Y +27.0% → Rwp=10.44% | score=10.44
+[粗调 (Stage 1) | A-Loop 011] ✅ PO r main.cif → r=1.176 | Rwp=10.03% | score=10.03
+[粗调 (Stage 1) | StepB | A-Loop 012] ✅ cell main.cif.c -0.375% → Rwp=9.52% | score=9.52
+[粗调 (Stage 1) | A-Loop 012| StepB] ✅ angle Bi2O3.cif.beta +0.450° → Rwp=9.44% | score=9.44
+[粗调 (Stage 1) | A-Loop 012] ✅ TCH U +27.0% → Rwp=9.44% | score=9.44
+[粗调 (Stage 1) | A-Loop 012] ✅ TCH V +27.0% → Rwp=9.42% | score=9.42
+[粗调 (Stage 1) | A-Loop 012] ✅ TCH Y +27.0% → Rwp=9.35% | score=9.35
+[粗调 (Stage 1) | StepB | A-Loop 013] ✅ cell Bi2O3.cif.c -0.375% → Rwp=8.93% | score=8.93
+[粗调 (Stage 1) | A-Loop 013] ✅ TCH U +27.0% → Rwp=8.93% | score=8.93
+[粗调 (Stage 1) | A-Loop 013] ✅ TCH V +27.0% → Rwp=8.93% | score=8.93
+[粗调 (Stage 1) | A-Loop 013] ✅ TCH Y +27.0% → Rwp=8.87% | score=8.87
+[粗调 (Stage 1) | StepB | A-Loop 014] ✅ cell Bi2O3.cif.a +0.375% → Rwp=8.76% | score=8.76
+[粗调 (Stage 1) | A-Loop 014] ✅ TCH U +27.0% → Rwp=8.75% | score=8.75
+[粗调 (Stage 1) | A-Loop 014] ✅ TCH V +27.0% → Rwp=8.75% | score=8.75
+[粗调 (Stage 1) | A-Loop 014] ✅ TCH Y +27.0% → Rwp=8.70% | score=8.70
+[粗调 (Stage 1) | A-Loop 015] ✅ TCH U +27.0% → Rwp=8.70% | score=8.70
+[粗调 (Stage 1) | A-Loop 015] ✅ TCH V +27.0% → Rwp=8.70% | score=8.70
+[粗调 (Stage 1) | A-Loop 016] ✅ TCH V +27.0% → Rwp=8.69% | score=8.69
+[粗调 (Stage 1) | A-Loop 016] ✅ TCH Y +27.0% → Rwp=8.69% | score=8.69
+[粗调 (Stage 1) | A-Loop 017] ✅ TCH U +27.0% → Rwp=8.68% | score=8.68
+[粗调 (Stage 1) | A-Loop 018] ↘️ 步长衰减：cell 0.00375->0.00262 | angle 0.450->0.315 | tch 0.270->0.189 | po 0.400->0.280 | Rwp=8.68% | score=8.68
+[粗调 (Stage 1) | A-Loop 019] ↘️ 步长衰减：cell 0.00262->0.00184 | angle 0.315->0.220 | tch 0.189->0.132 | po 0.280->0.196 | Rwp=8.68% | score=8.68
+[粗调 (Stage 1) | StepB | A-Loop 020] ✅ cell Bi2O3.cif.a -0.184% → Rwp=8.64% | score=8.64
+[粗调 (Stage 1) | StepB | A-Loop 020] ✅ cell Bi2O3.cif.c -0.184% → Rwp=8.63% | score=8.63
+[粗调 (Stage 1) | A-Loop 020] ✅ PO r main.cif → r=1.406 | Rwp=8.60% | score=8.60
+[粗调 (Stage 1) | A-Loop 020] ✅ PO r Bi2O3.cif → r=1.196 | Rwp=8.58% | score=8.58
+[粗调 (Stage 1) | A-Loop 021| StepB] ✅ angle Bi2O3.cif.alpha +0.220° → Rwp=8.47% | score=8.47
+[粗调 (Stage 1) | A-Loop 021] ✅ TCH V +13.2% → Rwp=8.47% | score=8.47
+[粗调 (Stage 1) | StepB | A-Loop 022] ✅ cell Bi2O3.cif.a -0.184% → Rwp=8.38% | score=8.38
+[粗调 (Stage 1) | A-Loop 022] ✅ TCH U +13.2% → Rwp=8.38% | score=8.38
+[粗调 (Stage 1) | A-Loop 022] ✅ TCH V +13.2% → Rwp=8.38% | score=8.38
+[粗调 (Stage 1) | A-Loop 023] ✅ TCH V +13.2% → Rwp=8.38% | score=8.38
+[粗调 (Stage 1) | A-Loop 024] ✅ TCH V +13.2% → Rwp=8.37% | score=8.37
+[粗调 (Stage 1) | A-Loop 025] ✅ TCH V +13.2% → Rwp=8.37% | score=8.37
+[粗调 (Stage 1) | A-Loop 026] ✅ TCH V +13.2% → Rwp=8.37% | score=8.37
+[粗调 (Stage 1) | A-Loop 027] ✅ TCH V +13.2% → Rwp=8.36% | score=8.36
+[粗调 (Stage 1) | A-Loop 028] ✅ TCH U -13.2% → Rwp=8.36% | score=8.36
+[粗调 (Stage 1) | A-Loop 028] ✅ TCH V +13.2% → Rwp=8.36% | score=8.36
+[粗调 (Stage 1) | A-Loop 029] ✅ TCH V +13.2% → Rwp=8.36% | score=8.36
+[粗调 (Stage 1) | A-Loop 030] ✅ TCH U -13.2% → Rwp=8.36% | score=8.36
+[粗调 (Stage 1) | A-Loop 030] ✅ TCH V +13.2% → Rwp=8.35% | score=8.35
+[粗调 (Stage 1) | A-Loop 031] ✅ TCH V +13.2% → Rwp=8.35% | score=8.35
+[粗调 (Stage 1) | A-Loop 031] ✅ TCH Y -13.2% → Rwp=8.34% | score=8.34
+[粗调 (Stage 1) | A-Loop 032] ✅ TCH V +13.2% → Rwp=8.34% | score=8.34
+[粗调 (Stage 1) | A-Loop 033] ✅ TCH U +13.2% → Rwp=8.33% | score=8.33
+[粗调 (Stage 1) | A-Loop 033] ✅ TCH V +13.2% → Rwp=8.32% | score=8.32
+[粗调 (Stage 1) | A-Loop 034] ✅ TCH V +13.2% → Rwp=8.31% | score=8.31
+[粗调 (Stage 1) | A-Loop 035] ✅ TCH V +13.2% → Rwp=8.31% | score=8.31
+[粗调 (Stage 1) | A-Loop 036] ✅ TCH V +13.2% → Rwp=8.30% | score=8.30
+[粗调 (Stage 1) | A-Loop 036] ✅ TCH Y -13.2% → Rwp=8.30% | score=8.30
+[粗调 (Stage 1) | A-Loop 037] ↘️ 步长衰减：cell 0.00184->0.00129 | angle 0.220->0.154 | tch 0.132->0.093 | po 0.196->0.137 | Rwp=8.30% | score=8.30
+[粗调 (Stage 1) | StepB | A-Loop 038] ✅ cell main.cif.c +0.129% → Rwp=8.29% | score=8.29
+[粗调 (Stage 1) | StepB | A-Loop 038] ✅ cell Bi2O3.cif.b +0.129% → Rwp=8.28% | score=8.28
+[粗调 (Stage 1) | A-Loop 038| StepB] ✅ angle Bi2O3.cif.beta +0.154° → Rwp=8.28% | score=8.28
+[粗调 (Stage 1) | A-Loop 038] ✅ TCH U -9.3% → Rwp=8.28% | score=8.28
+[粗调 (Stage 1) | A-Loop 038] ✅ TCH Y -9.3% → Rwp=8.27% | score=8.27
+[粗调 (Stage 1) | A-Loop 038] ✅ PO r Bi2O3.cif → r=1.032 | Rwp=8.21% | score=8.21
+[粗调 (Stage 1) | StepB | A-Loop 039] ✅ cell Bi2O3.cif.c -0.129% → Rwp=8.15% | score=8.15
+[粗调 (Stage 1) | A-Loop 039] ✅ TCH Y -9.3% → Rwp=8.15% | score=8.15
+[粗调 (Stage 1) | StepB | A-Loop 040] ✅ cell Bi2O3.cif.b +0.129% → Rwp=8.15% | score=8.15
+[粗调 (Stage 1) | A-Loop 040] ✅ TCH U +9.3% → Rwp=8.14% | score=8.14
+[粗调 (Stage 1) | A-Loop 041] ↘️ 步长衰减：cell 0.00129->0.00090 | angle 0.154->0.108 | tch 0.093->0.065 | po 0.137->0.096 | Rwp=8.14% | score=8.14
+[粗调 (Stage 1) | StepB | A-Loop 042] ✅ cell Bi2O3.cif.b -0.090% → Rwp=8.13% | score=8.13
+[粗调 (Stage 1) | A-Loop 042] ✅ PO r Bi2O3.cif → r=1.131 | Rwp=8.13% | score=8.13
+[粗调 (Stage 1) | StepB | A-Loop 043] ✅ cell main.cif.c -0.090% → Rwp=8.12% | score=8.12
+[粗调 (Stage 1) | StepB | A-Loop 043] ✅ cell Bi2O3.cif.a +0.090% → Rwp=8.11% | score=8.11
+[粗调 (Stage 1) | A-Loop 043] ✅ PO r main.cif → r=1.271 | Rwp=8.09% | score=8.09
+[粗调 (Stage 1) | A-Loop 044] ✅ TCH U -6.5% → Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | A-Loop 044] ✅ TCH Y +6.5% → Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | A-Loop 045] ↘️ 步长衰减：cell 0.00090->0.00063 | angle 0.108->0.076 | tch 0.065->0.045 | po 0.096->0.067 | Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | A-Loop 046] ↘️ 步长衰减：cell 0.00063->0.00044 | angle 0.076->0.053 | tch 0.045->0.045 | po 0.067->0.047 | Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | StepB | A-Loop 047] ✅ cell Bi2O3.cif.a -0.044% → Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | StepB | A-Loop 048] ✅ cell Bi2O3.cif.b +0.044% → Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | A-Loop 048| StepB] ✅ angle Bi2O3.cif.alpha +0.053° → Rwp=8.08% | score=8.08
+[粗调 (Stage 1) | StepB | A-Loop 049] ✅ cell Bi2O3.cif.b +0.044% → Rwp=8.07% | score=8.07
+[粗调 (Stage 1) | StepB | A-Loop 050] ✅ cell Bi2O3.cif.c -0.044% → Rwp=8.07% | score=8.07
+[粗调 (Stage 1) | A-Loop 051| StepB] ✅ angle Bi2O3.cif.gamma -0.053° → Rwp=8.07% | score=8.07
+[粗调 (Stage 1) | StepB | A-Loop 052] ✅ cell Bi2O3.cif.c -0.044% → Rwp=8.06% | score=8.06
+[粗调 (Stage 1) | A-Loop 053| StepB] ✅ angle Bi2O3.cif.alpha +0.053° → Rwp=8.06% | score=8.06
+[粗调 (Stage 1) | StepB | A-Loop 054] ✅ cell Bi2O3.cif.b -0.044% → Rwp=8.06% | score=8.06
+[粗调 (Stage 1) | StepB | A-Loop 055] ✅ cell Bi2O3.cif.c -0.044% → Rwp=8.06% | score=8.06
+[粗调 (Stage 1) | A-Loop 056] ↘️ 步长衰减：cell 0.00044->0.00031 | angle 0.053->0.037 | tch 0.045->0.045 | po 0.047->0.047 | Rwp=8.06% | score=8.06
+[粗调 (Stage 1) | StepB | A-Loop 057] ✅ cell Bi2O3.cif.b +0.031% → Rwp=8.05% | score=8.05
+[粗调 (Stage 1) | A-Loop 058] ↘️ 步长衰减：cell 0.00031->0.00022 | angle 0.037->0.037 | tch 0.045->0.045 | po 0.047->0.047 | Rwp=8.05% | score=8.05
+[粗调 (Stage 1) | A-Loop 059] ↘️ 步长衰减：cell 0.00022->0.00015 | angle 0.037->0.037 | tch 0.045->0.045 | po 0.047->0.047 | Rwp=8.05% | score=8.05
+[粗调 (Stage 1) | A-Loop 060] ⛳ 已到最小步长阈值，结束 A 段。
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms Bi2O3.cif group#0 y -0.0200 → Rwp=8.02%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms Bi2O3.cif group#1 y -0.0200 → Rwp=8.01%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms Bi2O3.cif group#2 y +0.0200 → Rwp=8.01%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms Bi2O3.cif group#2 z +0.0200 → Rwp=8.01%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms Bi2O3.cif group#3 z -0.0200 → Rwp=8.00%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms Bi2O3.cif group#2 x -0.0200 → Rwp=8.00%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms Bi2O3.cif group#2 y +0.0200 → Rwp=8.00%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms Bi2O3.cif group#4 x +0.0200 → Rwp=7.99%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 004] ↘️ 步长衰减：pos 0.0200->0.0140 | mix 0.125->0.087 | Rwp=7.99% 
+[粗调 (Stage 1) | B-Loop 005] ✅ atoms Bi2O3.cif group#2 z -0.0140 → Rwp=7.98%  pos_step=0.0140 mix_step=0.087
+[粗调 (Stage 1) | B-Loop 006] ↘️ 步长衰减：pos 0.0140->0.0098 | mix 0.087->0.061 | Rwp=7.98% 
+[粗调 (Stage 1) | B-Loop 007] ↘️ 步长衰减：pos 0.0098->0.0069 | mix 0.061->0.043 | Rwp=7.98% 
+[粗调 (Stage 1) | B-Loop 008] ↘️ 步长衰减：pos 0.0069->0.0048 | mix 0.043->0.030 | Rwp=7.98% 
+[粗调 (Stage 1) | B-Loop 009] ↘️ 步长衰减：pos 0.0048->0.0034 | mix 0.030->0.021 | Rwp=7.98% 
+[粗调 (Stage 1) | B-Loop 010] ↘️ 步长衰减：pos 0.0034->0.0024 | mix 0.021->0.015 | Rwp=7.98% 
+[粗调 (Stage 1) | B-Loop 011] ↘️ 步长衰减：pos 0.0024->0.0016 | mix 0.015->0.010 | Rwp=7.98% 
+[粗调 (Stage 1) | B-Loop 012] ↘️ 步长衰减：pos 0.0016->0.0016 | mix 0.010->0.007 | Rwp=7.98% 
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/pymatgen/io/cif.py:1620: FutureWarning: We strongly discourage using implicit binary/text `mode`, and this would not be allowed after 2025-06-01. I.e. you should pass t/b in `mode`.
+  with zopen(filename, mode=mode) as file:
+[粗调 (Stage 1) | B-Loop 013] ⛳ 已到最小步长阈值，结束 B 段。
+✅ 阶段完成：粗调 (Stage 1) | 当前 Rwp=7.98% | score=7.98
+🖼️ 已保存粗调阶段图像：stage1_output/Stage1_Refined.png
+💾 已保存粗调阶段谱线：stage1_output/Stage1_Refined.xy
+🧾 已保存粗调阶段文本报告：stage1_output/Stage1_Refined.txt
+💾 已导出粗调阶段 CIF 文件至 stage1_output/cifs/
+🧊 阶段保温：粗调 (Stage 1) 结果已保存，将传入下一阶段。
+
+🚀 进入阶段：微调 (Stage 2) | loops=100 
+♻️ 已载入上一阶段的结构与比例，作为 微调 (Stage 2) 初始状态。
+
+▶️ 微调 (Stage 2) StepA：结构拟合阶段（λ_stoich=0.0）
+✅ StepA 完成：Rwp=8.02% | score=8.02
+⛔ 跳过 微调 (Stage 2) 的 StepB（避免破坏结构）
+[微调 (Stage 2) | A-Loop 001] ✅ TCH Y -18.0% → Rwp=8.01% | score=8.01
+[微调 (Stage 2) | A-Loop 002] ↘️ 步长衰减：cell 0.00250->0.00175 | angle 0.360->0.252 | tch 0.180->0.126 | po 0.300->0.210 | Rwp=8.01% | score=8.01
+[微调 (Stage 2) | A-Loop 003] ✅ TCH Y +12.6% → Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 004] ↘️ 步长衰减：cell 0.00175->0.00122 | angle 0.252->0.176 | tch 0.126->0.088 | po 0.210->0.147 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 005] ↘️ 步长衰减：cell 0.00122->0.00086 | angle 0.176->0.123 | tch 0.088->0.062 | po 0.147->0.103 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 006] ↘️ 步长衰减：cell 0.00086->0.00060 | angle 0.123->0.086 | tch 0.062->0.043 | po 0.103->0.072 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 007] ↘️ 步长衰减：cell 0.00060->0.00042 | angle 0.086->0.061 | tch 0.043->0.043 | po 0.072->0.050 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 008] ↘️ 步长衰减：cell 0.00042->0.00029 | angle 0.061->0.042 | tch 0.043->0.043 | po 0.050->0.035 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 009] ↘️ 步长衰减：cell 0.00029->0.00021 | angle 0.042->0.042 | tch 0.043->0.043 | po 0.035->0.035 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 010] ↘️ 步长衰减：cell 0.00021->0.00014 | angle 0.042->0.042 | tch 0.043->0.043 | po 0.035->0.035 | Rwp=7.99% | score=7.99
+[微调 (Stage 2) | A-Loop 011] ⛳ 已到最小步长阈值，结束 A 段。
+[微调 (Stage 2) | B-Loop 001] ✅ atoms Bi2O3.cif group#0 z -0.0150 → Rwp=7.99%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 001] ✅ atoms Bi2O3.cif group#1 z +0.0150 → Rwp=7.98%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 001] ✅ atoms Bi2O3.cif group#3 z -0.0150 → Rwp=7.95%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 002] ✅ atoms Bi2O3.cif group#4 x +0.0150 → Rwp=7.94%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 002] ✅ atoms Bi2O3.cif group#11 x -0.0150 → Rwp=7.93%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 003] ✅ atoms Bi2O3.cif group#7 y -0.0150 → Rwp=7.92%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 004] ✅ atoms Bi2O3.cif group#11 y -0.0150 → Rwp=7.91%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 004] ✅ atoms Bi2O3.cif group#15 y -0.0150 → Rwp=7.91%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 005] ↘️ 步长衰减：pos 0.0150->0.0105 | mix 0.100->0.070 | Rwp=7.91% 
+[微调 (Stage 2) | B-Loop 006] ✅ atoms Bi2O3.cif group#14 x +0.0105 → Rwp=7.91%  pos_step=0.0105 mix_step=0.070
+[微调 (Stage 2) | B-Loop 006] ✅ atoms Bi2O3.cif group#19 x +0.0105 → Rwp=7.91%  pos_step=0.0105 mix_step=0.070
+[微调 (Stage 2) | B-Loop 007] ↘️ 步长衰减：pos 0.0105->0.0073 | mix 0.070->0.049 | Rwp=7.91% 
+[微调 (Stage 2) | B-Loop 008] ↘️ 步长衰减：pos 0.0073->0.0051 | mix 0.049->0.034 | Rwp=7.91% 
+[微调 (Stage 2) | B-Loop 009] ✅ atoms Bi2O3.cif group#5 z +0.0051 → Rwp=7.90%  pos_step=0.0051 mix_step=0.034
+[微调 (Stage 2) | B-Loop 010] ↘️ 步长衰减：pos 0.0051->0.0036 | mix 0.034->0.024 | Rwp=7.90% 
+[微调 (Stage 2) | B-Loop 011] ↘️ 步长衰减：pos 0.0036->0.0025 | mix 0.024->0.017 | Rwp=7.90% 
+[微调 (Stage 2) | B-Loop 012] ↘️ 步长衰减：pos 0.0025->0.0018 | mix 0.017->0.012 | Rwp=7.90% 
+[微调 (Stage 2) | B-Loop 013] ↘️ 步长衰减：pos 0.0018->0.0018 | mix 0.012->0.008 | Rwp=7.90% 
+[微调 (Stage 2) | B-Loop 014] ⛳ 已到最小步长阈值，结束 B 段。
+✅ 阶段完成：微调 (Stage 2) | 当前 Rwp=7.90% | score=7.90
+🖼️ 已保存微调阶段图像：stage2_output/Stage2_Refined.png
+💾 已保存微调阶段谱线：stage2_output/Stage2_Refined.xy
+🧾 已保存微调阶段文本报告：stage2_output/Stage2_Refined.txt
+💾 已导出微调阶段 CIF 文件至 stage2_output/cifs/
+🧊 阶段保温：微调 (Stage 2) 结果已保存，将传入下一阶段。
+
+🚀 进入阶段：精调 (Stage 3) | loops=150 
+♻️ 已载入上一阶段的结构与比例，作为 精调 (Stage 3) 初始状态。
+
+▶️ 精调 (Stage 3) StepA：结构拟合阶段（λ_stoich=0.0）
+✅ StepA 完成：Rwp=8.09% | score=8.09
+⛔ 跳过 精调 (Stage 3) 的 StepB（避免破坏结构）
+[精调 (Stage 3) | A-Loop 001] ✅ TCH Y +13.5% → Rwp=8.07% | score=8.07
+[精调 (Stage 3) | A-Loop 002] ✅ TCH U +13.5% → Rwp=8.05% | score=8.05
+[精调 (Stage 3) | A-Loop 003] ↘️ 步长衰减：cell 0.00175->0.00122 | angle 0.300->0.210 | tch 0.135->0.095 | po 0.250->0.175 | Rwp=8.05% | score=8.05
+[精调 (Stage 3) | A-Loop 004] ↘️ 步长衰减：cell 0.00122->0.00086 | angle 0.210->0.147 | tch 0.095->0.066 | po 0.175->0.122 | Rwp=8.05% | score=8.05
+[精调 (Stage 3) | A-Loop 005] ✅ TCH U -6.6% → Rwp=8.04% | score=8.04
+[精调 (Stage 3) | A-Loop 006] ↘️ 步长衰减：cell 0.00086->0.00060 | angle 0.147->0.103 | tch 0.066->0.046 | po 0.122->0.086 | Rwp=8.04% | score=8.04
+[精调 (Stage 3) | A-Loop 007] ✅ PO r main.cif → r=1.380 | Rwp=8.02% | score=8.02
+[精调 (Stage 3) | A-Loop 008] ↘️ 步长衰减：cell 0.00060->0.00042 | angle 0.103->0.072 | tch 0.046->0.046 | po 0.086->0.060 | Rwp=8.02% | score=8.02
+[精调 (Stage 3) | A-Loop 009] ↘️ 步长衰减：cell 0.00042->0.00029 | angle 0.072->0.050 | tch 0.046->0.046 | po 0.060->0.042 | Rwp=8.02% | score=8.02
+[精调 (Stage 3) | StepB | A-Loop 010] ✅ cell main.cif.a +0.029% → Rwp=8.01% | score=8.01
+[精调 (Stage 3) | A-Loop 011] ↘️ 步长衰减：cell 0.00029->0.00021 | angle 0.050->0.035 | tch 0.046->0.046 | po 0.042->0.042 | Rwp=8.01% | score=8.01
+[精调 (Stage 3) | A-Loop 012] ↘️ 步长衰减：cell 0.00021->0.00014 | angle 0.035->0.035 | tch 0.046->0.046 | po 0.042->0.042 | Rwp=8.01% | score=8.01
+[精调 (Stage 3) | A-Loop 013] ⛳ 已到最小步长阈值，结束 A 段。
+[精调 (Stage 3) | B-Loop 001] ✅ atoms Bi2O3.cif group#6 x -0.0125 → Rwp=7.97%  pos_step=0.0125 mix_step=0.090
+[精调 (Stage 3) | B-Loop 002] ✅ atoms Bi2O3.cif group#19 z -0.0125 → Rwp=7.96%  pos_step=0.0125 mix_step=0.090
+[精调 (Stage 3) | B-Loop 003] ↘️ 步长衰减：pos 0.0125->0.0087 | mix 0.090->0.063 | Rwp=7.96% 
+[精调 (Stage 3) | B-Loop 004] ↘️ 步长衰减：pos 0.0087->0.0061 | mix 0.063->0.044 | Rwp=7.96% 
+[精调 (Stage 3) | B-Loop 005] ✅ atoms main.cif group#4 z -0.0061 → Rwp=7.96%  pos_step=0.0061 mix_step=0.044
+[精调 (Stage 3) | B-Loop 005] ✅ atoms Bi2O3.cif group#13 y +0.0061 → Rwp=7.95%  pos_step=0.0061 mix_step=0.044
+[精调 (Stage 3) | B-Loop 005] ✅ atoms Bi2O3.cif group#19 z -0.0061 → Rwp=7.95%  pos_step=0.0061 mix_step=0.044
+[精调 (Stage 3) | B-Loop 006] ↘️ 步长衰减：pos 0.0061->0.0043 | mix 0.044->0.031 | Rwp=7.95% 
+[精调 (Stage 3) | B-Loop 007] ↘️ 步长衰减：pos 0.0043->0.0030 | mix 0.031->0.022 | Rwp=7.95% 
+[精调 (Stage 3) | B-Loop 008] ↘️ 步长衰减：pos 0.0030->0.0021 | mix 0.022->0.015 | Rwp=7.95% 
+[精调 (Stage 3) | B-Loop 009] ↘️ 步长衰减：pos 0.0021->0.0015 | mix 0.015->0.011 | Rwp=7.95% 
+[精调 (Stage 3) | B-Loop 010] ↘️ 步长衰减：pos 0.0015->0.0015 | mix 0.011->0.007 | Rwp=7.95% 
+[精调 (Stage 3) | B-Loop 011] ⛳ 已到最小步长阈值，结束 B 段。
+✅ 阶段完成：精调 (Stage 3) | 当前 Rwp=7.95% | score=7.95
+🧊 阶段保温：精调 (Stage 3) 结果已保存，将传入下一阶段。
+📁 已生成 refine_log.csv
+📈 已保存 Rwp_curve.png
+📈 已保存 phase_fraction_curve.png
+📈 已保存 scale_curve.png
+🖼️ 拟合图已保存：yfsf_Refined.png
+💾 已保存拟合曲线数据：yfsf_Refined.xy
+💾 已导出精修 CIF: yfsf_refined_cifs/main_refined.cif
+💾 已导出精修 CIF: yfsf_refined_cifs/Bi2O3_refined.cif
+
+📈 最终指标：Rwp = 7.95% 
+📊 相分数（softmax）与每相独立 scale：
+   main.cif                     frac= 57.90% | scale=0.711
+   Bi2O3.cif                    frac= 42.10% | scale=0.682
+📌 择优取向（March–Dollase）参数：
+   main.cif                     axis=[0,0,1] | r=1.3804
+   Bi2O3.cif                    axis=[0,0,1] | r=1.1310

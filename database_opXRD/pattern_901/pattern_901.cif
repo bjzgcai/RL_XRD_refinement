@@ -1,0 +1,38 @@
+# generated using pymatgen
+data_H8C2NCl
+_symmetry_space_group_name_H-M   P2_1/m
+_cell_length_a   4.56111000
+_cell_length_b   6.00107000
+_cell_length_c   8.24909000
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   94.12340000
+_cell_angle_gamma   90.00000000
+_symmetry_Int_Tables_number   11
+_chemical_formula_structural   H8C2NCl
+_chemical_formula_sum   'H16 C4 N2 Cl2'
+_cell_volume   225.20584183
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-x, -y, -z'
+  3  '-x, y+1/2, -z'
+  4  'x, -y+1/2, z'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  H  H0  4  0.15750000  0.61590000  0.73490000  1.0
+  H  H1  4  0.26750000  0.11660000  0.12850000  1.0
+  H  H2  4  0.29330000  0.11590000  0.42290000  1.0
+  H  H3  2  0.01580000  0.25000000  0.02430000  1.0
+  H  H4  2  0.05210000  0.25000000  0.51620000  1.0
+  C  C5  2  0.03490000  0.75000000  0.73383000  1.0
+  C  C6  2  0.17010000  0.25000000  0.42160000  1.0
+  N  N7  2  0.14290000  0.25000000  0.12508000  1.0
+  Cl  Cl8  2  0.38640000  0.75000000  0.15439000  1.0

@@ -1,0 +1,48 @@
+# generated using pymatgen
+data_Ca3Y3(Ge3O10)2
+_symmetry_space_group_name_H-M   P2_1/c
+_cell_length_a   6.90763000
+_cell_length_b   6.84276000
+_cell_length_c   18.75830000
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   108.99880000
+_cell_angle_gamma   90.00000000
+_symmetry_Int_Tables_number   14
+_chemical_formula_structural   Ca3Y3(Ge3O10)2
+_chemical_formula_sum   'Ca6 Y6 Ge12 O40'
+_cell_volume   838.35324452
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-x, -y, -z'
+  3  '-x, y+1/2, -z+1/2'
+  4  'x, -y+1/2, z+1/2'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ca  Ca0  4  0.02485000  0.59906000  0.91485000  0.5
+  Y  Y1  4  0.02485000  0.59906000  0.91485000  0.5
+  Ca  Ca2  4  0.12922000  0.12904000  0.25331000  0.5
+  Y  Y3  4  0.12922000  0.12904000  0.25331000  0.5
+  Ca  Ca4  4  0.41791000  0.73430000  0.08519000  0.5
+  Y  Y5  4  0.41791000  0.73430000  0.08519000  0.5
+  Ge  Ge6  4  0.09713000  0.12815000  0.92426000  1.0
+  Ge  Ge7  4  0.34394000  0.61699000  0.25893000  1.0
+  Ge  Ge8  4  0.45201000  0.22787000  0.07198000  1.0
+  O  O9  4  0.01560000  0.07460000  0.12890000  1.0
+  O  O10  4  0.06760000  0.71870000  0.04600000  1.0
+  O  O11  4  0.14700000  0.04960000  0.71710000  1.0
+  O  O12  4  0.18350000  0.68710000  0.76760000  1.0
+  O  O13  4  0.21710000  0.20160000  0.37950000  1.0
+  O  O14  4  0.30800000  0.08120000  0.58760000  1.0
+  O  O15  4  0.30840000  0.05270000  0.00590000  1.0
+  O  O16  4  0.36370000  0.68000000  0.96130000  1.0
+  O  O17  4  0.47300000  0.16790000  0.28430000  1.0
+  O  O18  4  0.47450000  0.54760000  0.35420000  1.0

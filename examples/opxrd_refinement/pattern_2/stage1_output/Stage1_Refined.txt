@@ -1,0 +1,8 @@
+=== 粗调阶段 Refinement Result ===
+Rwp : 14.119%
+TCH params: U=0.0001, V=2.37379e-06, W=0.000108122, X=0.0332451, Y=0.0001
+Global zero shift: 0.209915 deg
+Residual definition: Intensity_Obs - Intensity_Fit
+
+Phases:
+  pattern_2.cif                frac=100.00% | scale=1.0131

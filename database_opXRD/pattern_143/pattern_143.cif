@@ -1,0 +1,54 @@
+# generated using pymatgen
+data_Ne7Ni6H6(C4O3)6
+_symmetry_space_group_name_H-M   R-3
+_cell_length_a   25.76110000
+_cell_length_b   25.76110000
+_cell_length_c   6.75650000
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   120.00000000
+_symmetry_Int_Tables_number   148
+_chemical_formula_structural   Ne7Ni6H6(C4O3)6
+_chemical_formula_sum   'Ne21 Ni18 H18 C72 O54'
+_cell_volume   3883.12364800
+_cell_formula_units_Z   3
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-x, -y, -z'
+  3  '-y, x-y, z'
+  4  'y, -x+y, -z'
+  5  '-x+y, -x, z'
+  6  'x-y, x, -z'
+  7  'x+2/3, y+1/3, z+1/3'
+  8  '-x+2/3, -y+1/3, -z+1/3'
+  9  '-y+2/3, x-y+1/3, z+1/3'
+  10  'y+2/3, -x+y+1/3, -z+1/3'
+  11  '-x+y+2/3, -x+1/3, z+1/3'
+  12  'x-y+2/3, x+1/3, -z+1/3'
+  13  'x+1/3, y+2/3, z+2/3'
+  14  '-x+1/3, -y+2/3, -z+2/3'
+  15  '-y+1/3, x-y+2/3, z+2/3'
+  16  'y+1/3, -x+y+2/3, -z+2/3'
+  17  '-x+y+1/3, -x+2/3, z+2/3'
+  18  'x-y+1/3, x+2/3, -z+2/3'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ne  Ne0  3  0.00000000  0.00000000  0.50000000  1.0
+  Ne  Ne1  18  0.01336667  0.17733333  0.50633333  1.0
+  Ni  Ni2  18  0.01834667  0.30250333  0.68703333  1.0
+  H  H3  18  0.03253667  0.52649667  0.67663000  1.0
+  C  C4  18  0.00655667  0.55692000  0.92311000  1.0
+  C  C5  18  0.00667000  0.46076333  0.88588000  1.0
+  C  C6  18  0.00923667  0.41661000  0.75032333  1.0
+  C  C7  18  0.01744333  0.51575333  0.80913000  1.0
+  O  O8  18  0.00258333  0.36787667  0.78802667  1.0
+  O  O9  18  0.02585000  0.61137333  0.84448000  1.0
+  O  O10  18  0.02946333  0.43692000  0.56903333  1.0

@@ -1,0 +1,458 @@
+🚀 Start pattern_2
+GPU=1
+wl=1.540560
+outer_tasks=120
+inner_workers=2
+CMD=python /vepfs-mlp2/c20250207/model1/model1/yfsf_v44_rl_maincorr_opxrd.py --xy ./pattern_2.xy --main ./pattern_2.cif --wl 1.540560 --num-workers 2
+--------------------------------------------------
+
+📐 实验谱角度裁剪: [10.000, 80.000] deg | points 3200 -> 2801
+🖥️ 设备：cpu
+主相识别 | main=pattern_2.cif | pearson=(pattern_2.cif:1.000)
+初选最佳组合 | combo=pattern_2.cif | Rwp=50.03%
+主相偏置 | target=pattern_2.cif | bias=1.000 | 策略=初始组合+Stage1
+CPU 并行 worker 数: 2
+初始化完成 | Rwp=48.65%
+Wyckoff分组已冻结 | phases=1 | groups=5
+
+进入粗调 (Stage 1) | loops=100
+[粗调 (Stage 1)] Instrument Align | zero_shift=+0.2500° | Rwp 48.65% -> 47.73%
+[粗调 (Stage 1)] 设备零点偏移已锁定 | zero_shift=+0.2099°
+▶️ 粗调 (Stage 1) StepA：结构拟合阶段
+✅ StepA 完成：Rwp=47.73% | score=47.73
+粗调 (Stage 1) StepB：化学计量修正（λ_stoich=0.5)
+
+📘 [StoichPenalty] λ_stoich = 0.500
+👉 已识别主相为：pattern_2.cif
+🧩 各相的化学计量约束权重：
+   ├─ pattern_2.cif             | 类型: 主相  | λ_phase = 0.050
+-------------------------------------------------------
+✅ StepB 完成：Rwp=47.73% | score=47.73
+[粗调 (Stage 1)] angle pattern_2.cif.alpha -0.5step | Rwp 47.73% -> 42.93%
+[粗调 (Stage 1)] angle pattern_2.cif.gamma -0.5step | Rwp 42.93% -> 41.05%
+[粗调 (Stage 1)] tch U -0.5step | Rwp 41.05% -> 41.04%
+[粗调 (Stage 1)] tch V -0.5step | Rwp 41.04% -> 41.04%
+[粗调 (Stage 1)] tch Y -0.5step | Rwp 41.04% -> 41.03%
+[粗调 (Stage 1)] tch U -1.0step | Rwp 41.03% -> 41.02%
+[粗调 (Stage 1)] tch Y -1.0step | Rwp 41.02% -> 41.00%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 41.00% -> 40.99%
+[粗调 (Stage 1)] tch U -1.5step | Rwp 40.99% -> 40.99%
+[粗调 (Stage 1)] tch V -1.5step | Rwp 40.99% -> 40.98%
+[粗调 (Stage 1)] tch Y -1.5step | Rwp 40.98% -> 40.96%
+[粗调 (Stage 1)] tch W +1.5step | Rwp 40.96% -> 40.90%
+[粗调 (Stage 1)] tch X +1.5step | Rwp 40.90% -> 40.72%
+[粗调 (Stage 1)] tch X +1.0step | Rwp 40.72% -> 40.72%
+[粗调 (Stage 1)] po pattern_2.cif -0.5step | Rwp 40.72% -> 35.55%
+[粗调 (Stage 1)] po pattern_2.cif -1.0step | Rwp 35.55% -> 33.57%
+[粗调 (Stage 1)] tch U -0.5step | Rwp 33.57% -> 33.57%
+[粗调 (Stage 1)] tch V -0.5step | Rwp 33.57% -> 33.57%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 33.57% -> 33.57%
+[粗调 (Stage 1)] tch Y -0.5step | Rwp 33.57% -> 33.56%
+[粗调 (Stage 1)] tch U -1.0step | Rwp 33.56% -> 33.56%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 33.56% -> 33.56%
+[粗调 (Stage 1)] tch Y -1.0step | Rwp 33.56% -> 33.54%
+[粗调 (Stage 1)] tch U -1.5step | Rwp 33.54% -> 33.54%
+[粗调 (Stage 1)] tch V -1.5step | Rwp 33.54% -> 33.54%
+[粗调 (Stage 1)] tch Y -1.5step | Rwp 33.54% -> 33.53%
+[粗调 (Stage 1)] tch X +1.0step | Rwp 33.53% -> 33.47%
+[粗调 (Stage 1)] tch U -0.5step | Rwp 33.47% -> 33.47%
+[粗调 (Stage 1)] tch V -0.5step | Rwp 33.47% -> 33.47%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 33.47% -> 33.44%
+[粗调 (Stage 1)] tch Y -0.5step | Rwp 33.44% -> 33.44%
+[粗调 (Stage 1)] tch U -1.0step | Rwp 33.44% -> 33.44%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 33.44% -> 33.44%
+[粗调 (Stage 1)] tch W -1.0step | Rwp 33.44% -> 33.41%
+[粗调 (Stage 1)] tch Y -1.0step | Rwp 33.41% -> 33.41%
+[粗调 (Stage 1)] tch U -1.5step | Rwp 33.41% -> 33.41%
+[粗调 (Stage 1)] tch V -1.5step | Rwp 33.41% -> 33.41%
+[粗调 (Stage 1)] tch W -1.5step | Rwp 33.41% -> 33.39%
+[粗调 (Stage 1)] tch Y -1.5step | Rwp 33.39% -> 33.39%
+[粗调 (Stage 1)] cell pattern_2.cif.b +1.0step | Rwp 33.39% -> 32.81%
+[粗调 (Stage 1)] angle pattern_2.cif.beta -0.5step | Rwp 32.81% -> 31.46%
+[粗调 (Stage 1)] tch U -0.5step | Rwp 31.46% -> 31.46%
+[粗调 (Stage 1)] tch V -0.5step | Rwp 31.46% -> 31.46%
+[粗调 (Stage 1)] tch X -0.5step | Rwp 31.46% -> 31.32%
+[粗调 (Stage 1)] tch Y -0.5step | Rwp 31.32% -> 31.32%
+[粗调 (Stage 1)] tch U -1.0step | Rwp 31.32% -> 31.32%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 31.32% -> 31.32%
+[粗调 (Stage 1)] tch W -1.0step | Rwp 31.32% -> 31.31%
+[粗调 (Stage 1)] tch Y -1.0step | Rwp 31.31% -> 31.31%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 31.31% -> 31.31%
+[粗调 (Stage 1)] tch V -1.5step | Rwp 31.31% -> 31.31%
+[粗调 (Stage 1)] tch W -1.5step | Rwp 31.31% -> 31.31%
+[粗调 (Stage 1)] tch Y -1.5step | Rwp 31.31% -> 31.30%
+[粗调 (Stage 1)] po pattern_2.cif -0.5step | Rwp 31.30% -> 31.27%
+[粗调 (Stage 1)] cell pattern_2.cif.b +0.5step | Rwp 31.27% -> 31.26%
+[粗调 (Stage 1)] tch U -0.5step | Rwp 31.26% -> 31.26%
+[粗调 (Stage 1)] tch V -0.5step | Rwp 31.26% -> 31.26%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 31.26% -> 31.26%
+[粗调 (Stage 1)] tch X -0.5step | Rwp 31.26% -> 31.23%
+[粗调 (Stage 1)] tch Y -0.5step | Rwp 31.23% -> 31.22%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch W -1.0step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch Y -1.0step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch V -1.5step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch W -1.5step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch Y -1.5step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch W -1.0step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch V -1.5step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] tch W -1.5step | Rwp 31.22% -> 31.22%
+[粗调 (Stage 1)] cell pattern_2.cif.b -0.5step | Rwp 31.22% -> 31.18%
+[粗调 (Stage 1)] tch W -1.5step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1)] tch V -1.0step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1)] tch W -1.0step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1)] tch W -1.0step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1)] tch W -1.5step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1) | A-Loop 010] ↘️ 步长衰减：cell 0.00098->0.00079 | angle 0.094->0.075 | tch 0.270->0.216 | po 0.084->0.067 | Rwp=31.18% | score=31.18
+[粗调 (Stage 1)] tch X +0.5step | Rwp 31.18% -> 31.18%
+[粗调 (Stage 1)] cell pattern_2.cif.b +0.5step | Rwp 31.18% -> 31.13%
+[粗调 (Stage 1)] angle pattern_2.cif.beta -0.5step | Rwp 31.13% -> 31.05%
+[粗调 (Stage 1)] tch X -0.5step | Rwp 31.05% -> 31.01%
+[粗调 (Stage 1)] po pattern_2.cif -0.5step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1)] po pattern_2.cif -1.0step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1)] tch W +1.0step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1) | A-Loop 014] ↘️ 步长衰减：cell 0.00050->0.00040 | angle 0.048->0.048 | tch 0.216->0.173 | po 0.043->0.043 | Rwp=31.01% | score=31.01
+[粗调 (Stage 1) | A-Loop 015] ↘️ 步长衰减：cell 0.00040->0.00032 | angle 0.048->0.048 | tch 0.173->0.138 | po 0.043->0.043 | Rwp=31.01% | score=31.01
+[粗调 (Stage 1) | A-Loop 016] ↘️ 步长衰减：cell 0.00032->0.00026 | angle 0.048->0.048 | tch 0.138->0.111 | po 0.043->0.043 | Rwp=31.01% | score=31.01
+[粗调 (Stage 1) | A-Loop 017] ↘️ 步长衰减：cell 0.00026->0.00021 | angle 0.048->0.048 | tch 0.111->0.088 | po 0.043->0.043 | Rwp=31.01% | score=31.01
+[粗调 (Stage 1) | A-Loop 018] ↘️ 步长衰减：cell 0.00021->0.00016 | angle 0.048->0.048 | tch 0.088->0.071 | po 0.043->0.043 | Rwp=31.01% | score=31.01
+[粗调 (Stage 1)] tch X -0.5step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1) | A-Loop 020] ↘️ 步长衰减：cell 0.00016->0.00016 | angle 0.048->0.048 | tch 0.071->0.057 | po 0.043->0.043 | Rwp=31.01% | score=31.01
+[粗调 (Stage 1)] tch W -1.5step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1)] tch X +0.5step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1)] tch W -0.5step | Rwp 31.01% -> 31.01%
+[粗调 (Stage 1) | A-Loop 023] ⛳ 已到最小步长阈值，结束 A 段。
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#0 x -0.0100 → Rwp=30.96%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=30.94%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#2 x -0.0100 → Rwp=30.88%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#3 x -0.0100 → Rwp=30.86%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#0 z +0.0300 → Rwp=30.73%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#3 z +0.0300 → Rwp=30.55%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms pattern_2.cif group#3 x -0.0200 → Rwp=30.05%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 001] ✅ Biso (O +) optimized → Rwp=29.21%
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms pattern_2.cif group#3 x -0.0100 → Rwp=28.74%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms pattern_2.cif group#1 z +0.0300 → Rwp=28.50%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms pattern_2.cif group#2 z +0.0300 → Rwp=27.93%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms pattern_2.cif group#4 y -0.0100 → Rwp=27.85%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ atoms pattern_2.cif group#4 z -0.0300 → Rwp=25.45%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ✅ Biso (O +) optimized → Rwp=24.73%
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=24.70%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#3 x -0.0100 → Rwp=24.28%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#2 z -0.0200 → Rwp=24.22%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#0 y +0.0200 → Rwp=24.21%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#1 y +0.0200 → Rwp=24.17%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#3 y +0.0200 → Rwp=23.94%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#2 z +0.0100 → Rwp=23.86%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#3 z +0.0100 → Rwp=23.36%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#0 x +0.0200 → Rwp=23.18%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#2 x +0.0200 → Rwp=22.88%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms pattern_2.cif group#4 x +0.0200 → Rwp=22.62%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 003] ✅ Biso (O +) optimized → Rwp=21.98%
+[粗调 (Stage 1) | B-Loop 004] ✅ atoms pattern_2.cif group#3 x -0.0100 → Rwp=21.58%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 004] ✅ Biso (Ni +) optimized → Rwp=21.08%
+[粗调 (Stage 1) | B-Loop 005] ✅ atoms pattern_2.cif group#3 x -0.0100 → Rwp=20.68%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 005] ✅ atoms pattern_2.cif group#4 y -0.0200 → Rwp=20.46%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 005] ✅ Biso (Ni +) optimized → Rwp=20.10%
+[粗调 (Stage 1) | B-Loop 006] ✅ atoms pattern_2.cif group#3 z +0.0300 → Rwp=19.66%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 006] ✅ atoms pattern_2.cif group#3 z +0.0200 → Rwp=19.52%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 006] ✅ atoms pattern_2.cif group#3 y +0.0300 → Rwp=19.12%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 006] ✅ Biso (Ni +) optimized → Rwp=18.81%
+[粗调 (Stage 1) | B-Loop 007] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=18.78%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 007] ✅ atoms pattern_2.cif group#4 x -0.0100 → Rwp=18.34%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 007] ✅ Biso (O +) optimized → Rwp=18.17%
+[粗调 (Stage 1) | B-Loop 008] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=18.15%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 008] ✅ atoms pattern_2.cif group#4 x -0.0100 → Rwp=17.85%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 008] ✅ atoms pattern_2.cif group#0 y -0.0100 → Rwp=17.72%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 008] ✅ Biso (N +) optimized → Rwp=17.57%
+[粗调 (Stage 1) | B-Loop 009] ✅ Biso (Ni +) optimized → Rwp=17.44%
+[粗调 (Stage 1) | B-Loop 010] ✅ atoms pattern_2.cif group#4 x -0.0100 → Rwp=17.31%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 010] ✅ Biso (N +) optimized → Rwp=17.20%
+[粗调 (Stage 1) | B-Loop 011] ✅ atoms pattern_2.cif group#0 x -0.0100 → Rwp=17.19%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 011] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=17.19%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 011] ✅ atoms pattern_2.cif group#1 y -0.0100 → Rwp=17.17%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 011] ✅ atoms pattern_2.cif group#4 y -0.0100 → Rwp=17.12%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 011] ✅ atoms pattern_2.cif group#3 z +0.0200 → Rwp=17.01%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 011] ✅ Biso (N +) optimized → Rwp=16.92%
+[粗调 (Stage 1) | B-Loop 012] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=16.91%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 012] ✅ atoms pattern_2.cif group#2 x -0.0100 → Rwp=16.74%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 012] ✅ atoms pattern_2.cif group#4 x -0.0100 → Rwp=16.64%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 012] ✅ atoms pattern_2.cif group#0 y -0.0100 → Rwp=16.53%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 012] ✅ atoms pattern_2.cif group#2 y -0.0100 → Rwp=16.45%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 012] ✅ Biso (N +) optimized → Rwp=16.42%
+[粗调 (Stage 1) | B-Loop 013] ✅ atoms pattern_2.cif group#0 x -0.0100 → Rwp=16.34%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 013] ✅ atoms pattern_2.cif group#2 x -0.0100 → Rwp=16.19%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 013] ✅ atoms pattern_2.cif group#4 x -0.0100 → Rwp=16.04%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 014] ✅ atoms pattern_2.cif group#0 x -0.0100 → Rwp=15.93%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 014] ✅ atoms pattern_2.cif group#2 x -0.0100 → Rwp=15.79%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 014] ✅ Biso (H -) optimized → Rwp=15.79%
+[粗调 (Stage 1) | B-Loop 015] ✅ atoms pattern_2.cif group#1 x -0.0100 → Rwp=15.78%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 015] ✅ atoms pattern_2.cif group#3 y +0.0200 → Rwp=15.72%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 015] ✅ atoms pattern_2.cif group#1 z +0.0100 → Rwp=15.71%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 016] ↘️ 步长衰减：pos 0.0200->0.0160 | mix 0.125->0.100 | Rwp=15.71% | score=15.7089
+[粗调 (Stage 1) | B-Loop 016] ↘️ 步长衰减：pos 0.0200->0.0160 | mix 0.125->0.100 | Rwp=15.71% | score=15.71
+[粗调 (Stage 1) | B-Loop 017] ✅ atoms pattern_2.cif group#2 x -0.0080 → Rwp=15.70%  pos_step=0.0160 mix_step=0.100
+[粗调 (Stage 1) | B-Loop 017] ✅ Biso (H +) optimized → Rwp=15.70%
+[粗调 (Stage 1) | B-Loop 018] ✅ atoms pattern_2.cif group#0 x -0.0080 → Rwp=15.64%  pos_step=0.0160 mix_step=0.100
+[粗调 (Stage 1) | B-Loop 018] ✅ atoms pattern_2.cif group#2 x -0.0080 → Rwp=15.64%  pos_step=0.0160 mix_step=0.100
+[粗调 (Stage 1) | B-Loop 018] ✅ atoms pattern_2.cif group#4 x -0.0080 → Rwp=15.42%  pos_step=0.0160 mix_step=0.100
+[粗调 (Stage 1) | B-Loop 018] ✅ Biso (H +) optimized → Rwp=15.41%
+[粗调 (Stage 1) | B-Loop 019] ✅ atoms pattern_2.cif group#0 x -0.0080 → Rwp=15.35%  pos_step=0.0160 mix_step=0.100
+[粗调 (Stage 1) | B-Loop 019] ✅ Biso (H -) optimized → Rwp=15.35%
+[粗调 (Stage 1) | B-Loop 020] ✅ atoms pattern_2.cif group#1 x -0.0080 → Rwp=15.35%  pos_step=0.0160 mix_step=0.100
+[粗调 (Stage 1) | B-Loop 020] ✅ Biso (H -) optimized → Rwp=15.34%
+[粗调 (Stage 1) | B-Loop 021] ↘️ 步长衰减：pos 0.0160->0.0128 | mix 0.100->0.080 | Rwp=15.34% | score=15.3437
+[粗调 (Stage 1) | B-Loop 021] ↘️ 步长衰减：pos 0.0160->0.0128 | mix 0.100->0.080 | Rwp=15.34% | score=15.34
+[粗调 (Stage 1) | B-Loop 022] ✅ Biso (H -) optimized → Rwp=15.34%
+[粗调 (Stage 1) | B-Loop 023] ✅ atoms pattern_2.cif group#1 y -0.0064 → Rwp=15.34%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 023] ✅ atoms pattern_2.cif group#3 x +0.0192 → Rwp=14.87%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 023] ✅ atoms pattern_2.cif group#1 x +0.0192 → Rwp=14.86%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 023] ✅ atoms pattern_2.cif group#1 y -0.0192 → Rwp=14.83%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 023] ✅ Biso (H +) optimized → Rwp=14.82%
+[粗调 (Stage 1) | B-Loop 024] ✅ atoms pattern_2.cif group#4 x -0.0064 → Rwp=14.78%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 024] ✅ Biso (H +) optimized → Rwp=14.77%
+[粗调 (Stage 1) | B-Loop 025] ✅ Biso (H +) optimized → Rwp=14.76%
+[粗调 (Stage 1) | B-Loop 026] ✅ Biso (H +) optimized → Rwp=14.76%
+[粗调 (Stage 1) | B-Loop 027] ✅ Biso (H +) optimized → Rwp=14.76%
+[粗调 (Stage 1) | B-Loop 028] ✅ atoms pattern_2.cif group#3 z +0.0064 → Rwp=14.74%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 028] ✅ atoms pattern_2.cif group#0 y -0.0064 → Rwp=14.71%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 028] ✅ Biso (H +) optimized → Rwp=14.71%
+[粗调 (Stage 1) | B-Loop 029] ✅ atoms pattern_2.cif group#1 z +0.0128 → Rwp=14.71%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 029] ✅ atoms pattern_2.cif group#0 z -0.0064 → Rwp=14.68%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 029] ✅ atoms pattern_2.cif group#2 z -0.0064 → Rwp=14.66%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 029] ✅ atoms pattern_2.cif group#1 y -0.0128 → Rwp=14.63%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 029] ✅ Biso (H -) optimized → Rwp=14.62%
+[粗调 (Stage 1) | B-Loop 030] ✅ Biso (H -) optimized → Rwp=14.61%
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#3 z +0.0128 → Rwp=14.59%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#3 y -0.0128 → Rwp=14.54%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#1 y -0.0064 → Rwp=14.52%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#3 y -0.0064 → Rwp=14.51%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#2 z -0.0064 → Rwp=14.51%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#0 z -0.0064 → Rwp=14.48%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#1 z -0.0064 → Rwp=14.47%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ atoms pattern_2.cif group#1 y -0.0128 → Rwp=14.46%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 031] ✅ Biso (H -) optimized → Rwp=14.46%
+[粗调 (Stage 1) | B-Loop 032] ✅ atoms pattern_2.cif group#1 x +0.0192 → Rwp=14.45%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 032] ✅ atoms pattern_2.cif group#3 x +0.0192 → Rwp=14.28%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 032] ✅ atoms pattern_2.cif group#1 x +0.0128 → Rwp=14.28%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 032] ✅ atoms pattern_2.cif group#1 x -0.0064 → Rwp=14.27%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 032] ✅ Biso (H -) optimized → Rwp=14.27%
+[粗调 (Stage 1) | B-Loop 033] ✅ atoms pattern_2.cif group#3 z +0.0064 → Rwp=14.27%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 033] ✅ atoms pattern_2.cif group#2 y +0.0064 → Rwp=14.25%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 033] ✅ atoms pattern_2.cif group#4 y +0.0064 → Rwp=14.23%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 033] ✅ atoms pattern_2.cif group#1 y -0.0064 → Rwp=14.22%  pos_step=0.0128 mix_step=0.080
+[粗调 (Stage 1) | B-Loop 033] ✅ Biso (H -) optimized → Rwp=14.22%
+[粗调 (Stage 1) | B-Loop 034] ✅ Biso (H -) optimized → Rwp=14.22%
+[粗调 (Stage 1) | B-Loop 035] ✅ Biso (H -) optimized → Rwp=14.22%
+[粗调 (Stage 1) | B-Loop 036] ↘️ 步长衰减：pos 0.0128->0.0102 | mix 0.080->0.064 | Rwp=14.22% | score=14.2171
+[粗调 (Stage 1) | B-Loop 036] ↘️ 步长衰减：pos 0.0128->0.0102 | mix 0.080->0.064 | Rwp=14.22% | score=14.22
+[粗调 (Stage 1) | B-Loop 037] ↘️ 步长衰减：pos 0.0102->0.0082 | mix 0.064->0.051 | Rwp=14.22% | score=14.2171
+[粗调 (Stage 1) | B-Loop 037] ↘️ 步长衰减：pos 0.0102->0.0082 | mix 0.064->0.051 | Rwp=14.22% | score=14.22
+[粗调 (Stage 1) | B-Loop 038] ↘️ 步长衰减：pos 0.0082->0.0066 | mix 0.051->0.041 | Rwp=14.22% | score=14.2171
+[粗调 (Stage 1) | B-Loop 038] ↘️ 步长衰减：pos 0.0082->0.0066 | mix 0.051->0.041 | Rwp=14.22% | score=14.22
+[粗调 (Stage 1) | B-Loop 039] ✅ atoms pattern_2.cif group#4 x +0.0033 → Rwp=14.21%  pos_step=0.0066 mix_step=0.041
+[粗调 (Stage 1) | B-Loop 040] ↘️ 步长衰减：pos 0.0066->0.0052 | mix 0.041->0.033 | Rwp=14.21% | score=14.2114
+[粗调 (Stage 1) | B-Loop 040] ↘️ 步长衰减：pos 0.0066->0.0052 | mix 0.041->0.033 | Rwp=14.21% | score=14.21
+[粗调 (Stage 1) | B-Loop 041] ↘️ 步长衰减：pos 0.0052->0.0042 | mix 0.033->0.026 | Rwp=14.21% | score=14.2114
+[粗调 (Stage 1) | B-Loop 041] ↘️ 步长衰减：pos 0.0052->0.0042 | mix 0.033->0.026 | Rwp=14.21% | score=14.21
+[粗调 (Stage 1) | B-Loop 042] ↘️ 步长衰减：pos 0.0042->0.0034 | mix 0.026->0.021 | Rwp=14.21% | score=14.2114
+[粗调 (Stage 1) | B-Loop 042] ↘️ 步长衰减：pos 0.0042->0.0034 | mix 0.026->0.021 | Rwp=14.21% | score=14.21
+[粗调 (Stage 1) | B-Loop 043] ✅ atoms pattern_2.cif group#1 x +0.0050 → Rwp=14.21%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 043] ✅ atoms pattern_2.cif group#3 x +0.0050 → Rwp=14.20%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 043] ✅ atoms pattern_2.cif group#4 x +0.0034 → Rwp=14.20%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 043] ✅ atoms pattern_2.cif group#4 z +0.0017 → Rwp=14.20%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 043] ✅ atoms pattern_2.cif group#3 y -0.0017 → Rwp=14.20%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 043] ✅ Biso (H -) optimized → Rwp=14.20%
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#3 z +0.0034 → Rwp=14.19%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#0 y +0.0050 → Rwp=14.18%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#2 y +0.0050 → Rwp=14.18%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#1 x +0.0050 → Rwp=14.17%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#3 x +0.0034 → Rwp=14.17%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#4 z +0.0017 → Rwp=14.16%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#1 y -0.0017 → Rwp=14.16%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#3 x -0.0017 → Rwp=14.16%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#1 y -0.0034 → Rwp=14.16%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 044] ✅ atoms pattern_2.cif group#2 z -0.0034 → Rwp=14.15%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 045] ✅ atoms pattern_2.cif group#3 z +0.0050 → Rwp=14.15%  pos_step=0.0034 mix_step=0.021
+[粗调 (Stage 1) | B-Loop 046] ↘️ 步长衰减：pos 0.0034->0.0027 | mix 0.021->0.017 | Rwp=14.15% | score=14.1509
+[粗调 (Stage 1) | B-Loop 046] ↘️ 步长衰减：pos 0.0034->0.0027 | mix 0.021->0.017 | Rwp=14.15% | score=14.15
+[粗调 (Stage 1) | B-Loop 047] ✅ atoms pattern_2.cif group#4 z +0.0040 → Rwp=14.14%  pos_step=0.0027 mix_step=0.017
+[粗调 (Stage 1) | B-Loop 048] ↘️ 步长衰减：pos 0.0027->0.0021 | mix 0.017->0.013 | Rwp=14.14% | score=14.1365
+[粗调 (Stage 1) | B-Loop 048] ↘️ 步长衰减：pos 0.0027->0.0021 | mix 0.017->0.013 | Rwp=14.14% | score=14.14
+[粗调 (Stage 1) | B-Loop 049] ✅ atoms pattern_2.cif group#0 y +0.0032 → Rwp=14.13%  pos_step=0.0021 mix_step=0.013
+[粗调 (Stage 1) | B-Loop 049] ✅ atoms pattern_2.cif group#2 y +0.0032 → Rwp=14.13%  pos_step=0.0021 mix_step=0.013
+[粗调 (Stage 1) | B-Loop 050] ✅ atoms pattern_2.cif group#3 z +0.0021 → Rwp=14.12%  pos_step=0.0021 mix_step=0.013
+[粗调 (Stage 1) | B-Loop 050] ✅ atoms pattern_2.cif group#1 x +0.0032 → Rwp=14.12%  pos_step=0.0021 mix_step=0.013
+[粗调 (Stage 1) | B-Loop 050] ✅ atoms pattern_2.cif group#3 y +0.0021 → Rwp=14.12%  pos_step=0.0021 mix_step=0.013
+[粗调 (Stage 1) | B-Loop 050] ✅ atoms pattern_2.cif group#1 y -0.0011 → Rwp=14.12%  pos_step=0.0021 mix_step=0.013
+[粗调 (Stage 1) | B-Loop 051] ↘️ 步长衰减：pos 0.0021->0.0017 | mix 0.013->0.011 | Rwp=14.12% | score=14.1188
+[粗调 (Stage 1) | B-Loop 051] ↘️ 步长衰减：pos 0.0021->0.0017 | mix 0.013->0.011 | Rwp=14.12% | score=14.12
+[粗调 (Stage 1) | B-Loop 052] ↘️ 步长衰减：pos 0.0017->0.0014 | mix 0.011->0.009 | Rwp=14.12% | score=14.1188
+[粗调 (Stage 1) | B-Loop 052] ⛳ 已到最小步长阈值，结束 B 段。
+粗调 (Stage 1) 完成 | Rwp=14.12% | score=14.12
+🖼️ 已保存粗调阶段图像：stage1_output/Stage1_Refined.png
+💾 已保存粗调阶段谱线：stage1_output/Stage1_Refined.xy
+🧾 已保存粗调阶段文本报告：stage1_output/Stage1_Refined.txt
+💾 已导出粗调阶段 CIF 文件至 stage1_output/cifs/
+
+进入微调 (Stage 2) | loops=80
+[微调 (Stage 2)] Instrument Align | zero_shift=+0.2500° | Rwp 14.12% -> 14.06%
+[微调 (Stage 2)] 设备零点偏移已锁定 | zero_shift=+0.2351°
+▶️ 微调 (Stage 2) StepA：结构拟合阶段
+✅ StepA 完成：Rwp=14.06% | score=14.06
+⛔ 跳过 微调 (Stage 2) 的 StepB（避免破坏结构）
+[微调 (Stage 2)] tch W +1.5step | Rwp 14.06% -> 14.06%
+[微调 (Stage 2)] tch X +1.5step | Rwp 14.06% -> 13.71%
+[微调 (Stage 2)] po pattern_2.cif -0.5step | Rwp 13.71% -> 13.65%
+[微调 (Stage 2)] po pattern_2.cif -1.0step | Rwp 13.65% -> 13.58%
+[微调 (Stage 2)] po pattern_2.cif -1.5step | Rwp 13.58% -> 13.57%
+[微调 (Stage 2) | A-Loop 002] ↘️ 步长衰减：cell 0.00200->0.00160 | angle 0.288->0.230 | tch 0.180->0.144 | po 0.300->0.240 | Rwp=13.57% | score=13.57
+[微调 (Stage 2)] tch W -0.5step | Rwp 13.57% -> 13.57%
+[微调 (Stage 2) | A-Loop 004] ↘️ 步长衰减：cell 0.00128->0.00102 | angle 0.184->0.147 | tch 0.144->0.115 | po 0.192->0.154 | Rwp=13.57% | score=13.57
+[微调 (Stage 2)] tch W -0.5step | Rwp 13.57% -> 13.57%
+[微调 (Stage 2) | A-Loop 006] ↘️ 步长衰减：cell 0.00082->0.00066 | angle 0.118->0.094 | tch 0.115->0.092 | po 0.123->0.098 | Rwp=13.57% | score=13.57
+[微调 (Stage 2) | A-Loop 007] ↘️ 步长衰减：cell 0.00066->0.00052 | angle 0.094->0.075 | tch 0.092->0.074 | po 0.098->0.079 | Rwp=13.57% | score=13.57
+[微调 (Stage 2)] tch W -1.5step | Rwp 13.57% -> 13.57%
+[微调 (Stage 2)] cell pattern_2.cif.b +0.5step | Rwp 13.57% -> 13.57%
+[微调 (Stage 2)] tch W -0.5step | Rwp 13.57% -> 13.57%
+[微调 (Stage 2) | A-Loop 010] ↘️ 步长衰减：cell 0.00042->0.00034 | angle 0.048->0.048 | tch 0.074->0.059 | po 0.050->0.040 | Rwp=13.57% | score=13.57
+[微调 (Stage 2) | A-Loop 011] ↘️ 步长衰减：cell 0.00034->0.00027 | angle 0.048->0.048 | tch 0.059->0.047 | po 0.040->0.040 | Rwp=13.57% | score=13.57
+[微调 (Stage 2) | A-Loop 012] ↘️ 步长衰减：cell 0.00027->0.00021 | angle 0.048->0.048 | tch 0.047->0.047 | po 0.040->0.040 | Rwp=13.57% | score=13.57
+[微调 (Stage 2) | A-Loop 013] ⛳ 已到最小步长阈值，结束 A 段。
+[微调 (Stage 2) | B-Loop 001] ↘️ 步长衰减：pos 0.0150->0.0120 | mix 0.100->0.080 | Rwp=13.57% | score=13.5662
+[微调 (Stage 2) | B-Loop 001] ↘️ 步长衰减：pos 0.0150->0.0120 | mix 0.100->0.080 | Rwp=13.57% | score=13.57
+[微调 (Stage 2) | B-Loop 002] ↘️ 步长衰减：pos 0.0120->0.0096 | mix 0.080->0.064 | Rwp=13.57% | score=13.5662
+[微调 (Stage 2) | B-Loop 002] ↘️ 步长衰减：pos 0.0120->0.0096 | mix 0.080->0.064 | Rwp=13.57% | score=13.57
+[微调 (Stage 2) | B-Loop 003] ✅ atoms pattern_2.cif group#1 x -0.0048 → Rwp=13.57%  pos_step=0.0096 mix_step=0.064
+[微调 (Stage 2) | B-Loop 003] ✅ atoms pattern_2.cif group#4 x -0.0048 → Rwp=13.57%  pos_step=0.0096 mix_step=0.064
+[微调 (Stage 2) | B-Loop 004] ✅ atoms pattern_2.cif group#1 z -0.0048 → Rwp=13.56%  pos_step=0.0096 mix_step=0.064
+[微调 (Stage 2) | B-Loop 005] ✅ atoms pattern_2.cif group#0 z -0.0048 → Rwp=13.55%  pos_step=0.0096 mix_step=0.064
+[微调 (Stage 2) | B-Loop 005] ✅ atoms pattern_2.cif group#1 z -0.0048 → Rwp=13.54%  pos_step=0.0096 mix_step=0.064
+[微调 (Stage 2) | B-Loop 005] ✅ atoms pattern_2.cif group#1 x +0.0048 → Rwp=13.54%  pos_step=0.0096 mix_step=0.064
+[微调 (Stage 2) | B-Loop 006] ↘️ 步长衰减：pos 0.0096->0.0077 | mix 0.064->0.051 | Rwp=13.54% | score=13.5420
+[微调 (Stage 2) | B-Loop 006] ↘️ 步长衰减：pos 0.0096->0.0077 | mix 0.064->0.051 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 007] ↘️ 步长衰减：pos 0.0077->0.0061 | mix 0.051->0.041 | Rwp=13.54% | score=13.5420
+[微调 (Stage 2) | B-Loop 007] ↘️ 步长衰减：pos 0.0077->0.0061 | mix 0.051->0.041 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 008] ↘️ 步长衰减：pos 0.0061->0.0049 | mix 0.041->0.033 | Rwp=13.54% | score=13.5420
+[微调 (Stage 2) | B-Loop 008] ↘️ 步长衰减：pos 0.0061->0.0049 | mix 0.041->0.033 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 009] ↘️ 步长衰减：pos 0.0049->0.0039 | mix 0.033->0.026 | Rwp=13.54% | score=13.5420
+[微调 (Stage 2) | B-Loop 009] ↘️ 步长衰减：pos 0.0049->0.0039 | mix 0.033->0.026 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 010] ✅ atoms pattern_2.cif group#1 y -0.0020 → Rwp=13.54%  pos_step=0.0039 mix_step=0.026
+[微调 (Stage 2) | B-Loop 010] ✅ atoms pattern_2.cif group#3 y -0.0020 → Rwp=13.54%  pos_step=0.0039 mix_step=0.026
+[微调 (Stage 2) | B-Loop 011] ↘️ 步长衰减：pos 0.0039->0.0031 | mix 0.026->0.021 | Rwp=13.54% | score=13.5395
+[微调 (Stage 2) | B-Loop 011] ↘️ 步长衰减：pos 0.0039->0.0031 | mix 0.026->0.021 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 012] ↘️ 步长衰减：pos 0.0031->0.0025 | mix 0.021->0.017 | Rwp=13.54% | score=13.5395
+[微调 (Stage 2) | B-Loop 012] ↘️ 步长衰减：pos 0.0031->0.0025 | mix 0.021->0.017 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 013] ↘️ 步长衰减：pos 0.0025->0.0020 | mix 0.017->0.013 | Rwp=13.54% | score=13.5395
+[微调 (Stage 2) | B-Loop 013] ↘️ 步长衰减：pos 0.0025->0.0020 | mix 0.017->0.013 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 014] ✅ atoms pattern_2.cif group#2 x -0.0010 → Rwp=13.54%  pos_step=0.0020 mix_step=0.013
+[微调 (Stage 2) | B-Loop 015] ↘️ 步长衰减：pos 0.0020->0.0016 | mix 0.013->0.011 | Rwp=13.54% | score=13.5385
+[微调 (Stage 2) | B-Loop 015] ↘️ 步长衰减：pos 0.0020->0.0016 | mix 0.013->0.011 | Rwp=13.54% | score=13.54
+[微调 (Stage 2) | B-Loop 016] ↘️ 步长衰减：pos 0.0016->0.0013 | mix 0.011->0.009 | Rwp=13.54% | score=13.5385
+[微调 (Stage 2) | B-Loop 016] ⛳ 已到最小步长阈值，结束 B 段。
+微调 (Stage 2) 完成 | Rwp=13.54% | score=13.54
+🖼️ 已保存微调阶段图像：stage2_output/Stage2_Refined.png
+💾 已保存微调阶段谱线：stage2_output/Stage2_Refined.xy
+🧾 已保存微调阶段文本报告：stage2_output/Stage2_Refined.txt
+💾 已导出微调阶段 CIF 文件至 stage2_output/cifs/
+
+进入精调 (Stage 3) | loops=80
+[精调 (Stage 3)] Instrument Align | zero_shift=+0.2500° | Rwp 13.54% -> 13.53%
+[精调 (Stage 3)] 设备零点偏移已锁定 | zero_shift=+0.2351°
+▶️ 精调 (Stage 3) StepA：结构拟合阶段
+✅ StepA 完成：Rwp=13.54% | score=13.54
+⛔ 跳过 精调 (Stage 3) 的 StepB（避免破坏结构）
+[精调 (Stage 3)] tch W -1.5step | Rwp 13.54% -> 13.54%
+[精调 (Stage 3) | A-Loop 002] ↘️ 步长衰减：cell 0.00140->0.00112 | angle 0.240->0.192 | tch 0.135->0.108 | po 0.200->0.160 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 003] ↘️ 步长衰减：cell 0.00112->0.00090 | angle 0.192->0.154 | tch 0.108->0.086 | po 0.160->0.128 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 004] ↘️ 步长衰减：cell 0.00090->0.00072 | angle 0.154->0.123 | tch 0.086->0.069 | po 0.128->0.102 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 005] ↘️ 步长衰减：cell 0.00072->0.00057 | angle 0.123->0.098 | tch 0.069->0.055 | po 0.102->0.082 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 006] ↘️ 步长衰减：cell 0.00057->0.00046 | angle 0.098->0.079 | tch 0.055->0.044 | po 0.082->0.066 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 007] ↘️ 步长衰减：cell 0.00046->0.00037 | angle 0.079->0.063 | tch 0.044->0.044 | po 0.066->0.052 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 008] ↘️ 步长衰减：cell 0.00037->0.00029 | angle 0.063->0.050 | tch 0.044->0.044 | po 0.052->0.042 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 009] ↘️ 步长衰减：cell 0.00029->0.00023 | angle 0.050->0.040 | tch 0.044->0.044 | po 0.042->0.042 | Rwp=13.54% | score=13.54
+[精调 (Stage 3) | A-Loop 010] ⛳ 已到最小步长阈值，结束 A 段。
+[精调 (Stage 3) | B-Loop 001] ✅ atoms pattern_2.cif group#2 z -0.0063 → Rwp=13.54%  pos_step=0.0125 mix_step=0.090
+[精调 (Stage 3) | B-Loop 002] ✅ atoms pattern_2.cif group#1 z -0.0063 → Rwp=13.53%  pos_step=0.0125 mix_step=0.090
+[精调 (Stage 3) | B-Loop 003] ↘️ 步长衰减：pos 0.0125->0.0100 | mix 0.090->0.072 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 003] ↘️ 步长衰减：pos 0.0125->0.0100 | mix 0.090->0.072 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 004] ↘️ 步长衰减：pos 0.0100->0.0080 | mix 0.072->0.058 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 004] ↘️ 步长衰减：pos 0.0100->0.0080 | mix 0.072->0.058 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 005] ↘️ 步长衰减：pos 0.0080->0.0064 | mix 0.058->0.046 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 005] ↘️ 步长衰减：pos 0.0080->0.0064 | mix 0.058->0.046 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 006] ↘️ 步长衰减：pos 0.0064->0.0051 | mix 0.046->0.037 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 006] ↘️ 步长衰减：pos 0.0064->0.0051 | mix 0.046->0.037 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 007] ↘️ 步长衰减：pos 0.0051->0.0041 | mix 0.037->0.029 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 007] ↘️ 步长衰减：pos 0.0051->0.0041 | mix 0.037->0.029 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 008] ↘️ 步长衰减：pos 0.0041->0.0033 | mix 0.029->0.024 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 008] ↘️ 步长衰减：pos 0.0041->0.0033 | mix 0.029->0.024 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 009] ↘️ 步长衰减：pos 0.0033->0.0026 | mix 0.024->0.019 | Rwp=13.53% | score=13.5323
+[精调 (Stage 3) | B-Loop 009] ↘️ 步长衰减：pos 0.0033->0.0026 | mix 0.024->0.019 | Rwp=13.53% | score=13.53
+[精调 (Stage 3) | B-Loop 010] ✅ atoms pattern_2.cif group#2 z +0.0039 → Rwp=13.53%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 010] ✅ atoms pattern_2.cif group#3 z +0.0039 → Rwp=13.53%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 010] ✅ Biso (H +) optimized → Rwp=13.53%
+[精调 (Stage 3) | B-Loop 011] ✅ atoms pattern_2.cif group#1 z +0.0039 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 011] ✅ Biso (H +) optimized → Rwp=13.52%
+[精调 (Stage 3) | B-Loop 012] ✅ atoms pattern_2.cif group#1 z +0.0039 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 012] ✅ atoms pattern_2.cif group#2 y -0.0013 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 012] ✅ atoms pattern_2.cif group#0 z -0.0013 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 012] ✅ atoms pattern_2.cif group#1 x +0.0013 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 012] ✅ atoms pattern_2.cif group#3 x +0.0013 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 013] ✅ atoms pattern_2.cif group#3 z +0.0013 → Rwp=13.52%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 013] ✅ atoms pattern_2.cif group#4 z +0.0013 → Rwp=13.51%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 013] ✅ atoms pattern_2.cif group#1 y -0.0026 → Rwp=13.51%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 013] ✅ Biso (H -) optimized → Rwp=13.51%
+[精调 (Stage 3) | B-Loop 014] ✅ atoms pattern_2.cif group#0 z -0.0013 → Rwp=13.51%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 014] ✅ atoms pattern_2.cif group#2 z -0.0013 → Rwp=13.50%  pos_step=0.0026 mix_step=0.019
+[精调 (Stage 3) | B-Loop 014] ✅ Biso (H -) optimized → Rwp=13.50%
+[精调 (Stage 3) | B-Loop 015] ↘️ 步长衰减：pos 0.0026->0.0021 | mix 0.019->0.015 | Rwp=13.50% | score=13.5044
+[精调 (Stage 3) | B-Loop 015] ↘️ 步长衰减：pos 0.0026->0.0021 | mix 0.019->0.015 | Rwp=13.50% | score=13.50
+[精调 (Stage 3) | B-Loop 016] ✅ atoms pattern_2.cif group#3 z +0.0031 → Rwp=13.50%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 016] ✅ Biso (H +) optimized → Rwp=13.50%
+[精调 (Stage 3) | B-Loop 017] ✅ atoms pattern_2.cif group#1 z +0.0031 → Rwp=13.50%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 017] ✅ atoms pattern_2.cif group#4 z +0.0031 → Rwp=13.50%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 017] ✅ atoms pattern_2.cif group#0 y +0.0031 → Rwp=13.50%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 017] ✅ atoms pattern_2.cif group#2 y +0.0031 → Rwp=13.49%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 017] ✅ atoms pattern_2.cif group#3 z +0.0021 → Rwp=13.49%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 018] ✅ atoms pattern_2.cif group#3 y +0.0031 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 018] ✅ atoms pattern_2.cif group#1 z +0.0021 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 018] ✅ atoms pattern_2.cif group#1 x +0.0021 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 019] ✅ atoms pattern_2.cif group#3 y +0.0021 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 019] ✅ atoms pattern_2.cif group#3 z +0.0021 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 019] ✅ atoms pattern_2.cif group#4 y +0.0021 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 019] ✅ atoms pattern_2.cif group#1 x +0.0021 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 019] ✅ atoms pattern_2.cif group#0 z -0.0010 → Rwp=13.48%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 019] ✅ atoms pattern_2.cif group#2 z -0.0010 → Rwp=13.47%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 020] ✅ atoms pattern_2.cif group#3 z +0.0010 → Rwp=13.47%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 020] ✅ atoms pattern_2.cif group#0 z -0.0010 → Rwp=13.47%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 020] ✅ atoms pattern_2.cif group#2 z -0.0010 → Rwp=13.47%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 020] ✅ atoms pattern_2.cif group#4 x -0.0031 → Rwp=13.47%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 020] ✅ atoms pattern_2.cif group#2 z -0.0031 → Rwp=13.47%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 020] ✅ Biso (H -) optimized → Rwp=13.47%
+[精调 (Stage 3) | B-Loop 021] ✅ atoms pattern_2.cif group#0 y +0.0031 → Rwp=13.46%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 021] ✅ atoms pattern_2.cif group#1 z +0.0021 → Rwp=13.46%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 021] ✅ atoms pattern_2.cif group#4 z +0.0021 → Rwp=13.46%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 021] ✅ atoms pattern_2.cif group#4 x +0.0021 → Rwp=13.46%  pos_step=0.0021 mix_step=0.015
+[精调 (Stage 3) | B-Loop 022] ↘️ 步长衰减：pos 0.0021->0.0017 | mix 0.015->0.012 | Rwp=13.46% | score=13.4567
+[精调 (Stage 3) | B-Loop 022] ↘️ 步长衰减：pos 0.0021->0.0017 | mix 0.015->0.012 | Rwp=13.46% | score=13.46
+[精调 (Stage 3) | B-Loop 023] ↘️ 步长衰减：pos 0.0017->0.0013 | mix 0.012->0.010 | Rwp=13.46% | score=13.4567
+[精调 (Stage 3) | B-Loop 023] ⛳ 已到最小步长阈值，结束 B 段。
+精调 (Stage 3) 完成 | Rwp=13.46% | score=13.46
+🖼️ 已保存精调阶段图像：stage3_output/Stage3_Refined.png
+💾 已保存精调阶段谱线：stage3_output/Stage3_Refined.xy
+🧾 已保存精调阶段文本报告：stage3_output/Stage3_Refined.txt
+💾 已导出精调阶段 CIF 文件至 stage3_output/cifs/
+🖼️ 拟合图已保存：yfsf_Refined.png
+💾 已保存拟合曲线数据：yfsf_Refined.xy
+💾 已导出精修 CIF: yfsf_refined_cifs/pattern_2_refined.cif
+
+📈 最终指标：Rwp = 13.46%
+📊 相分数（softmax）与每相独立 scale：
+   pattern_2.cif                frac=100.00% | scale=0.992
+📌 择优取向（March–Dollase）参数：
+   pattern_2.cif                axis=[0,0,1] | r=0.2000
+
+⏱ Elapsed: 3154.991 s
+🔚 ReturnCode: 0

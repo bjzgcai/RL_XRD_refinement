@@ -1,0 +1,45 @@
+# generated using pymatgen
+data_CaCe4Si3O13
+_symmetry_space_group_name_H-M   P6_3/m
+_cell_length_a   9.59912000
+_cell_length_b   9.59912000
+_cell_length_c   7.09284000
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   120.00000000
+_symmetry_Int_Tables_number   176
+_chemical_formula_structural   CaCe4Si3O13
+_chemical_formula_sum   'Ca2 Ce8 Si6 O26'
+_cell_volume   565.99635797
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-x, -y, -z'
+  3  'x-y, x, z+1/2'
+  4  '-x+y, -x, -z+1/2'
+  5  '-y, x-y, z'
+  6  'y, -x+y, -z'
+  7  '-x, -y, z+1/2'
+  8  'x, y, -z+1/2'
+  9  '-x+y, -x, z'
+  10  'x-y, x, -z'
+  11  'y, -x+y, z+1/2'
+  12  '-y, x-y, -z+1/2'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ca  Ca0  4  0.33333333  0.66666667  0.99910000  0.5
+  Ce  Ce1  4  0.33333333  0.66666667  0.99910000  0.5
+  Ce  Ce2  6  0.01214000  0.24408000  0.25000000  1.0
+  Si  Si3  6  0.03270000  0.40400000  0.75000000  1.0
+  O  O4  12  0.08160000  0.34100000  0.56680000  1.0
+  O  O5  6  0.13460000  0.59800000  0.75000000  1.0
+  O  O6  6  0.15720000  0.67070000  0.25000000  1.0
+  O  O7  2  0.00000000  0.00000000  0.25000000  1.0

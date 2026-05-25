@@ -1,0 +1,5 @@
+numpy>=1.21
+scipy>=1.7
+torch>=1.12
+matplotlib>=3.5
+pymatgen>=2022.0

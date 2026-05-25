@@ -1,0 +1,7 @@
+=== Stage 2 Refinement Result ===
+Rwp : 7.904%
+TCH params: U=0.0556557, V=0.1, W=0.15, X=0.15, Y=0.15237
+
+Phases:
+  main.cif                     frac= 55.07% | scale=0.6406
+  Bi2O3.cif                    frac= 44.93% | scale=0.6882

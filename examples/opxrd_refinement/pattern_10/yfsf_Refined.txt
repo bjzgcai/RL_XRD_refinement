@@ -1,0 +1,17 @@
+=== yfsf_Refined ===
+XY file   : ./pattern_10.xy
+Final Rwp : 13.563%
+TCH params (final): U=0.0001, V=8.50204e-08, W=0.0418542, X=0.0168125, Y=0.0001
+Residual definition: Intensity_Obs - Intensity_Fit
+
+Phases (fractions & per-phase scales):
+  pattern_10.cif               frac=100.00% | scale=1.0096
+
+Preferred Orientation (March–Dollase):
+  bounds: r in [0.30, 3.00]
+  pattern_10.cif               axis=[0,0,1] | r=0.9399
+
+Stoichiometry target (phase=pattern_10.cif): {'Cs': 8.0, 'H': 64.0, 'C': 96.0, 'N': 8.0}
+
+Exported CIFs:
+  yfsf_refined_cifs/pattern_10_refined.cif

@@ -1,0 +1,50 @@
+# generated using pymatgen
+data_BaTm6Ge7O24
+_symmetry_space_group_name_H-M   P2_1/m
+_cell_length_a   5.63967000
+_cell_length_b   27.85377000
+_cell_length_c   7.01259000
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   106.34440000
+_cell_angle_gamma   90.00000000
+_symmetry_Int_Tables_number   11
+_chemical_formula_structural   BaTm6Ge7O24
+_chemical_formula_sum   'Ba2 Tm12 Ge14 O48'
+_cell_volume   1057.06260937
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-x, -y, -z'
+  3  '-x, y+1/2, -z'
+  4  'x, -y+1/2, z'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ba  Ba0  2  0.28720000  0.75000000  0.92819000  1.0
+  Tm  Tm1  4  0.12505000  0.18508000  0.74812000  1.0
+  Tm  Tm2  4  0.19143000  0.04061000  0.17838000  1.0
+  Tm  Tm3  4  0.21662000  0.60063000  0.60186000  1.0
+  Ge  Ge4  4  0.23980000  0.16542000  0.26540000  1.0
+  Ge  Ge5  4  0.27230000  0.02461000  0.69360000  1.0
+  Ge  Ge6  4  0.31170000  0.61248000  0.12000000  1.0
+  Ge  Ge7  2  0.44680000  0.75000000  0.45530000  1.0
+  O  O8  4  0.05920000  0.16550000  0.43540000  1.0
+  O  O9  4  0.08560000  0.19490000  0.05090000  1.0
+  O  O10  4  0.09330000  0.01810000  0.85480000  1.0
+  O  O11  4  0.10310000  0.05190000  0.46050000  1.0
+  O  O12  4  0.12140000  0.59570000  0.88840000  1.0
+  O  O13  4  0.14150000  0.62480000  0.29350000  1.0
+  O  O14  4  0.38300000  0.11200000  0.24700000  1.0
+  O  O15  4  0.41000000  0.52930000  0.67330000  1.0
+  O  O16  4  0.47010000  0.55710000  0.20310000  1.0
+  O  O17  4  0.47220000  0.70120000  0.62100000  1.0
+  O  O18  4  0.48370000  0.66000000  0.11120000  1.0
+  O  O19  2  0.13790000  0.75000000  0.30900000  1.0
+  O  O20  2  0.33510000  0.25000000  0.68760000  1.0

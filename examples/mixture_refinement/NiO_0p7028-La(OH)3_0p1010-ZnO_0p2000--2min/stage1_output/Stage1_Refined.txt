@@ -1,0 +1,8 @@
+=== Stage 1 Refinement Result ===
+Rwp : 6.457%
+TCH params: U=0.00819265, V=0.000544434, W=0.106575, X=0.113484, Y=0.0234723
+
+Phases:
+  main.cif                     frac= 71.08% | scale=0.5413
+  ZnO.cif                      frac= 21.78% | scale=0.3643
+  La(OH)3.cif                  frac=  7.15% | scale=0.2848

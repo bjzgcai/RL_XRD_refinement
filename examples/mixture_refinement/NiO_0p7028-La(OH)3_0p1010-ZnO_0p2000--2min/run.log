@@ -1,0 +1,222 @@
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/pymatgen/io/cif.py:1229: UserWarning: Issues encountered while parsing CIF: 2 fractional coordinates rounded to ideal values to avoid issues with finite precision.
+  warnings.warn("Issues encountered while parsing CIF: " + "\n".join(self.warnings))
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/pymatgen/io/cif.py:1229: UserWarning: Issues encountered while parsing CIF: 4 fractional coordinates rounded to ideal values to avoid issues with finite precision.
+  warnings.warn("Issues encountered while parsing CIF: " + "\n".join(self.warnings))
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/pymatgen/symmetry/analyzer.py:130: DeprecationWarning: dict interface is deprecated. Use attribute interface instead
+  return self._space_group_data["international"]
+📄 实验数据：/home/dataset-assist-0/Three-stage-refinement/precursor/benchmark_run/NiO_0p7028-La(OH)3_0p1010-ZnO_0p2000--8min/sample.xy
+🔍 候选杂质相：2 个
+
+🏷️ Top 候选：
+   ZnO.cif                      corr=0.218
+   La(OH)3.cif                  corr=0.077
+
+🖥️ 设备：cuda
+• 组合 main.cif                                                     → Rwp= 22.05% 
+• 组合 main.cif + ZnO.cif                                           → Rwp= 21.26% 
+• 组合 main.cif + La(OH)3.cif                                       → Rwp= 21.65% 
+• 组合 main.cif + ZnO.cif + La(OH)3.cif                             → Rwp= 21.00% 
+
+✅ 初选最佳组合： main.cif + ZnO.cif + La(OH)3.cif
+   初选 Rwp = 21.00% 
+📌 已冻结 Wyckoff 分组：
+   main.cif: 2 组
+   ZnO.cif: 2 组
+   La(OH)3.cif: 3 组
+
+🔁 外层精修启动：Rwp=22.66% |  score=22.66
+
+🚀 进入阶段：粗调 (Stage 1) | loops=60 
+
+▶️ 粗调 (Stage 1) StepA：结构拟合阶段（λ_stoich=0.0）
+✅ StepA 完成：Rwp=21.03% | score=21.03
+粗调 (Stage 1) StepB：化学计量修正（λ_stoich=0.5)
+
+📘 [StoichPenalty] λ_stoich = 0.500
+👉 已识别主相为：main.cif
+🧩 各相的化学计量约束权重：
+   ├─ main.cif                  | 类型: 主相  | λ_phase = 0.050
+   ├─ ZnO.cif                   | 类型: 杂相  | λ_phase = 0.400
+   ├─ La(OH)3.cif               | 类型: 杂相  | λ_phase = 0.400
+-------------------------------------------------------
+✅ StepB 完成：Rwp=22.90% | score=22.90
+[粗调 (Stage 1) | StepB | A-Loop 001] ✅ cell main.cif.a -0.375% → Rwp=19.39% | score=19.39
+[粗调 (Stage 1) | StepB | A-Loop 001] ✅ cell ZnO.cif.a +0.375% → Rwp=19.10% | score=19.10
+[粗调 (Stage 1) | StepB | A-Loop 001] ✅ cell ZnO.cif.c -0.375% → Rwp=19.06% | score=19.06
+[粗调 (Stage 1) | A-Loop 001| StepB] ✅ angle La(OH)3.cif.alpha -0.450° → Rwp=18.84% | score=18.84
+[粗调 (Stage 1) | A-Loop 001] ✅ TCH Y -27.0% → Rwp=18.77% | score=18.77
+[粗调 (Stage 1) | StepB | A-Loop 002] ✅ cell main.cif.a -0.375% → Rwp=18.58% | score=18.58
+[粗调 (Stage 1) | StepB | A-Loop 002] ✅ cell main.cif.b -0.375% → Rwp=16.71% | score=16.71
+[粗调 (Stage 1) | StepB | A-Loop 002] ✅ cell ZnO.cif.a +0.375% → Rwp=15.81% | score=15.81
+[粗调 (Stage 1) | A-Loop 002] ✅ TCH V -27.0% → Rwp=15.78% | score=15.78
+[粗调 (Stage 1) | A-Loop 002] ✅ TCH X +27.0% → Rwp=15.61% | score=15.61
+[粗调 (Stage 1) | A-Loop 002] ✅ TCH Y -27.0% → Rwp=15.53% | score=15.53
+[粗调 (Stage 1) | A-Loop 002] ✅ PO r main.cif → r=1.400 | Rwp=14.63% | score=14.63
+[粗调 (Stage 1) | StepB | A-Loop 003] ✅ cell main.cif.a -0.375% → Rwp=13.69% | score=13.69
+[粗调 (Stage 1) | StepB | A-Loop 003] ✅ cell La(OH)3.cif.a -0.375% → Rwp=13.49% | score=13.49
+[粗调 (Stage 1) | StepB | A-Loop 003] ✅ cell La(OH)3.cif.b -0.375% → Rwp=13.45% | score=13.45
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH U +27.0% → Rwp=13.45% | score=13.45
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH W +27.0% → Rwp=13.30% | score=13.30
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH X +27.0% → Rwp=12.81% | score=12.81
+[粗调 (Stage 1) | A-Loop 003] ✅ TCH Y +27.0% → Rwp=12.77% | score=12.77
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH W +27.0% → Rwp=12.58% | score=12.58
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH X +27.0% → Rwp=11.99% | score=11.99
+[粗调 (Stage 1) | A-Loop 004] ✅ TCH Y +27.0% → Rwp=11.94% | score=11.94
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH U +27.0% → Rwp=11.94% | score=11.94
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH V -27.0% → Rwp=11.93% | score=11.93
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH W +27.0% → Rwp=11.69% | score=11.69
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH X +27.0% → Rwp=11.05% | score=11.05
+[粗调 (Stage 1) | A-Loop 005] ✅ TCH Y +27.0% → Rwp=10.99% | score=10.99
+[粗调 (Stage 1) | StepB | A-Loop 006] ✅ cell La(OH)3.cif.b +0.375% → Rwp=10.98% | score=10.98
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH U +27.0% → Rwp=10.98% | score=10.98
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH V +27.0% → Rwp=10.97% | score=10.97
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH W +27.0% → Rwp=10.67% | score=10.67
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH X +27.0% → Rwp=9.98% | score=9.98
+[粗调 (Stage 1) | A-Loop 006] ✅ TCH Y +27.0% → Rwp=9.97% | score=9.97
+[粗调 (Stage 1) | A-Loop 006] ✅ PO r La(OH)3.cif → r=1.400 | Rwp=9.92% | score=9.92
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH U +27.0% → Rwp=9.91% | score=9.91
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH V +27.0% → Rwp=9.91% | score=9.91
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH W +27.0% → Rwp=9.56% | score=9.56
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH X +27.0% → Rwp=8.93% | score=8.93
+[粗调 (Stage 1) | A-Loop 007] ✅ TCH Y +27.0% → Rwp=8.89% | score=8.89
+[粗调 (Stage 1) | A-Loop 007] ✅ PO r La(OH)3.cif → r=0.840 | Rwp=8.87% | score=8.87
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH W +27.0% → Rwp=8.65% | score=8.65
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH X +27.0% → Rwp=8.34% | score=8.34
+[粗调 (Stage 1) | A-Loop 008] ✅ TCH Y +27.0% → Rwp=8.33% | score=8.33
+[粗调 (Stage 1) | A-Loop 008] ✅ PO r La(OH)3.cif → r=1.176 | Rwp=8.28% | score=8.28
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH U -27.0% → Rwp=8.28% | score=8.28
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH V -27.0% → Rwp=8.26% | score=8.26
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH W +27.0% → Rwp=8.19% | score=8.19
+[粗调 (Stage 1) | A-Loop 009] ✅ TCH Y +27.0% → Rwp=8.12% | score=8.12
+[粗调 (Stage 1) | A-Loop 010] ✅ TCH U +27.0% → Rwp=8.12% | score=8.12
+[粗调 (Stage 1) | A-Loop 010] ✅ TCH Y -27.0% → Rwp=8.10% | score=8.10
+[粗调 (Stage 1) | A-Loop 011] ↘️ 步长衰减：cell 0.00375->0.00262 | angle 0.450->0.315 | tch 0.270->0.189 | po 0.400->0.280 | Rwp=8.10% | score=8.10
+[粗调 (Stage 1) | StepB | A-Loop 012] ✅ cell main.cif.a +0.262% → Rwp=7.50% | score=7.50
+[粗调 (Stage 1) | StepB | A-Loop 012] ✅ cell ZnO.cif.c -0.262% → Rwp=7.33% | score=7.33
+[粗调 (Stage 1) | A-Loop 012| StepB] ✅ angle La(OH)3.cif.alpha +0.315° → Rwp=7.19% | score=7.19
+[粗调 (Stage 1) | A-Loop 012| StepB] ✅ angle La(OH)3.cif.gamma -0.315° → Rwp=7.05% | score=7.05
+[粗调 (Stage 1) | A-Loop 013] ↘️ 步长衰减：cell 0.00262->0.00184 | angle 0.315->0.220 | tch 0.189->0.132 | po 0.280->0.196 | Rwp=7.05% | score=7.05
+[粗调 (Stage 1) | A-Loop 014] ✅ TCH Y +13.2% → Rwp=6.97% | score=6.97
+[粗调 (Stage 1) | StepB | A-Loop 015] ✅ cell main.cif.c -0.184% → Rwp=6.95% | score=6.95
+[粗调 (Stage 1) | StepB | A-Loop 015] ✅ cell La(OH)3.cif.c -0.184% → Rwp=6.78% | score=6.78
+[粗调 (Stage 1) | A-Loop 015] ✅ TCH U +13.2% → Rwp=6.74% | score=6.74
+[粗调 (Stage 1) | A-Loop 015] ✅ TCH V -13.2% → Rwp=6.60% | score=6.60
+[粗调 (Stage 1) | A-Loop 016] ↘️ 步长衰减：cell 0.00184->0.00129 | angle 0.220->0.154 | tch 0.132->0.093 | po 0.196->0.137 | Rwp=6.60% | score=6.60
+[粗调 (Stage 1) | A-Loop 017] ↘️ 步长衰减：cell 0.00129->0.00090 | angle 0.154->0.108 | tch 0.093->0.065 | po 0.137->0.096 | Rwp=6.60% | score=6.60
+[粗调 (Stage 1) | A-Loop 018] ✅ TCH X +6.5% → Rwp=6.52% | score=6.52
+[粗调 (Stage 1) | A-Loop 019] ↘️ 步长衰减：cell 0.00090->0.00063 | angle 0.108->0.076 | tch 0.065->0.045 | po 0.096->0.067 | Rwp=6.52% | score=6.52
+[粗调 (Stage 1) | A-Loop 020] ↘️ 步长衰减：cell 0.00063->0.00044 | angle 0.076->0.053 | tch 0.045->0.045 | po 0.067->0.047 | Rwp=6.52% | score=6.52
+[粗调 (Stage 1) | A-Loop 021] ↘️ 步长衰减：cell 0.00044->0.00031 | angle 0.053->0.037 | tch 0.045->0.045 | po 0.047->0.047 | Rwp=6.52% | score=6.52
+[粗调 (Stage 1) | A-Loop 022] ↘️ 步长衰减：cell 0.00031->0.00022 | angle 0.037->0.037 | tch 0.045->0.045 | po 0.047->0.047 | Rwp=6.52% | score=6.52
+[粗调 (Stage 1) | StepB | A-Loop 023] ✅ cell ZnO.cif.c +0.022% → Rwp=6.51% | score=6.51
+[粗调 (Stage 1) | A-Loop 024] ↘️ 步长衰减：cell 0.00022->0.00015 | angle 0.037->0.037 | tch 0.045->0.045 | po 0.047->0.047 | Rwp=6.51% | score=6.51
+[粗调 (Stage 1) | A-Loop 025] ⛳ 已到最小步长阈值，结束 A 段。
+[粗调 (Stage 1) | B-Loop 001] ✅ atoms La(OH)3.cif group#1 z -0.0200 → Rwp=6.46%  pos_step=0.0200 mix_step=0.125
+[粗调 (Stage 1) | B-Loop 002] ↘️ 步长衰减：pos 0.0200->0.0140 | mix 0.125->0.087 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 003] ✅ atoms La(OH)3.cif group#2 y +0.0140 → Rwp=6.46%  pos_step=0.0140 mix_step=0.087
+[粗调 (Stage 1) | B-Loop 004] ↘️ 步长衰减：pos 0.0140->0.0098 | mix 0.087->0.061 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 005] ↘️ 步长衰减：pos 0.0098->0.0069 | mix 0.061->0.043 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 006] ↘️ 步长衰减：pos 0.0069->0.0048 | mix 0.043->0.030 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 007] ↘️ 步长衰减：pos 0.0048->0.0034 | mix 0.030->0.021 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 008] ↘️ 步长衰减：pos 0.0034->0.0024 | mix 0.021->0.015 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 009] ↘️ 步长衰减：pos 0.0024->0.0016 | mix 0.015->0.010 | Rwp=6.46% 
+[粗调 (Stage 1) | B-Loop 010] ↘️ 步长衰减：pos 0.0016->0.0016 | mix 0.010->0.007 | Rwp=6.46% 
+/home/dataset-assist-0/myenvs_dir/XRD/lib/python3.10/site-packages/pymatgen/io/cif.py:1620: FutureWarning: We strongly discourage using implicit binary/text `mode`, and this would not be allowed after 2025-06-01. I.e. you should pass t/b in `mode`.
+  with zopen(filename, mode=mode) as file:
+[粗调 (Stage 1) | B-Loop 011] ⛳ 已到最小步长阈值，结束 B 段。
+✅ 阶段完成：粗调 (Stage 1) | 当前 Rwp=6.46% | score=6.46
+🖼️ 已保存粗调阶段图像：stage1_output/Stage1_Refined.png
+💾 已保存粗调阶段谱线：stage1_output/Stage1_Refined.xy
+🧾 已保存粗调阶段文本报告：stage1_output/Stage1_Refined.txt
+💾 已导出粗调阶段 CIF 文件至 stage1_output/cifs/
+🧊 阶段保温：粗调 (Stage 1) 结果已保存，将传入下一阶段。
+
+🚀 进入阶段：微调 (Stage 2) | loops=100 
+♻️ 已载入上一阶段的结构与比例，作为 微调 (Stage 2) 初始状态。
+
+▶️ 微调 (Stage 2) StepA：结构拟合阶段（λ_stoich=0.0）
+✅ StepA 完成：Rwp=7.24% | score=7.24
+⛔ 跳过 微调 (Stage 2) 的 StepB（避免破坏结构）
+[微调 (Stage 2) | StepB | A-Loop 001] ✅ cell ZnO.cif.c +0.250% → Rwp=6.82% | score=6.82
+[微调 (Stage 2) | A-Loop 001] ✅ TCH U +18.0% → Rwp=6.81% | score=6.81
+[微调 (Stage 2) | A-Loop 001] ✅ TCH V +18.0% → Rwp=6.80% | score=6.80
+[微调 (Stage 2) | A-Loop 001] ✅ PO r La(OH)3.cif → r=1.529 | Rwp=6.79% | score=6.79
+[微调 (Stage 2) | A-Loop 002] ↘️ 步长衰减：cell 0.00250->0.00175 | angle 0.360->0.252 | tch 0.180->0.126 | po 0.300->0.210 | Rwp=6.79% | score=6.79
+[微调 (Stage 2) | A-Loop 003] ✅ TCH U -12.6% → Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 003] ✅ TCH V +12.6% → Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 004] ↘️ 步长衰减：cell 0.00175->0.00122 | angle 0.252->0.176 | tch 0.126->0.088 | po 0.210->0.147 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 005] ↘️ 步长衰减：cell 0.00122->0.00086 | angle 0.176->0.123 | tch 0.088->0.062 | po 0.147->0.103 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 006] ↘️ 步长衰减：cell 0.00086->0.00060 | angle 0.123->0.086 | tch 0.062->0.043 | po 0.103->0.072 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 007] ↘️ 步长衰减：cell 0.00060->0.00042 | angle 0.086->0.061 | tch 0.043->0.043 | po 0.072->0.050 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 008] ↘️ 步长衰减：cell 0.00042->0.00029 | angle 0.061->0.042 | tch 0.043->0.043 | po 0.050->0.035 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 009] ↘️ 步长衰减：cell 0.00029->0.00021 | angle 0.042->0.042 | tch 0.043->0.043 | po 0.035->0.035 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 010] ↘️ 步长衰减：cell 0.00021->0.00014 | angle 0.042->0.042 | tch 0.043->0.043 | po 0.035->0.035 | Rwp=6.60% | score=6.60
+[微调 (Stage 2) | A-Loop 011] ⛳ 已到最小步长阈值，结束 A 段。
+[微调 (Stage 2) | B-Loop 001] ✅ atoms main.cif group#0 x -0.0150 → Rwp=6.59%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 001] ✅ atoms La(OH)3.cif group#2 z +0.0150 → Rwp=6.59%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 002] ✅ atoms La(OH)3.cif group#2 z +0.0150 → Rwp=6.57%  pos_step=0.0150 mix_step=0.100
+[微调 (Stage 2) | B-Loop 003] ↘️ 步长衰减：pos 0.0150->0.0105 | mix 0.100->0.070 | Rwp=6.57% 
+[微调 (Stage 2) | B-Loop 004] ✅ atoms main.cif group#0 x +0.0105 → Rwp=6.53%  pos_step=0.0105 mix_step=0.070
+[微调 (Stage 2) | B-Loop 005] ↘️ 步长衰减：pos 0.0105->0.0073 | mix 0.070->0.049 | Rwp=6.53% 
+[微调 (Stage 2) | B-Loop 006] ↘️ 步长衰减：pos 0.0073->0.0051 | mix 0.049->0.034 | Rwp=6.53% 
+[微调 (Stage 2) | B-Loop 007] ↘️ 步长衰减：pos 0.0051->0.0036 | mix 0.034->0.024 | Rwp=6.53% 
+[微调 (Stage 2) | B-Loop 008] ↘️ 步长衰减：pos 0.0036->0.0025 | mix 0.024->0.017 | Rwp=6.53% 
+[微调 (Stage 2) | B-Loop 009] ↘️ 步长衰减：pos 0.0025->0.0018 | mix 0.017->0.012 | Rwp=6.53% 
+[微调 (Stage 2) | B-Loop 010] ↘️ 步长衰减：pos 0.0018->0.0018 | mix 0.012->0.008 | Rwp=6.53% 
+[微调 (Stage 2) | B-Loop 011] ⛳ 已到最小步长阈值，结束 B 段。
+✅ 阶段完成：微调 (Stage 2) | 当前 Rwp=6.53% | score=6.53
+🖼️ 已保存微调阶段图像：stage2_output/Stage2_Refined.png
+💾 已保存微调阶段谱线：stage2_output/Stage2_Refined.xy
+🧾 已保存微调阶段文本报告：stage2_output/Stage2_Refined.txt
+💾 已导出微调阶段 CIF 文件至 stage2_output/cifs/
+🧊 阶段保温：微调 (Stage 2) 结果已保存，将传入下一阶段。
+
+🚀 进入阶段：精调 (Stage 3) | loops=150 
+♻️ 已载入上一阶段的结构与比例，作为 精调 (Stage 3) 初始状态。
+
+▶️ 精调 (Stage 3) StepA：结构拟合阶段（λ_stoich=0.0）
+✅ StepA 完成：Rwp=7.63% | score=7.63
+⛔ 跳过 精调 (Stage 3) 的 StepB（避免破坏结构）
+[精调 (Stage 3) | StepB | A-Loop 001] ✅ cell main.cif.c -0.175% → Rwp=7.55% | score=7.55
+[精调 (Stage 3) | A-Loop 001| StepB] ✅ angle La(OH)3.cif.alpha -0.300° → Rwp=7.12% | score=7.12
+[精调 (Stage 3) | A-Loop 002] ↘️ 步长衰减：cell 0.00175->0.00122 | angle 0.300->0.210 | tch 0.135->0.095 | po 0.250->0.175 | Rwp=7.12% | score=7.12
+[精调 (Stage 3) | A-Loop 003] ✅ TCH U -9.4% → Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 004] ↘️ 步长衰减：cell 0.00122->0.00086 | angle 0.210->0.147 | tch 0.095->0.066 | po 0.175->0.122 | Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 005] ↘️ 步长衰减：cell 0.00086->0.00060 | angle 0.147->0.103 | tch 0.066->0.046 | po 0.122->0.086 | Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 006] ↘️ 步长衰减：cell 0.00060->0.00042 | angle 0.103->0.072 | tch 0.046->0.046 | po 0.086->0.060 | Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 007] ↘️ 步长衰减：cell 0.00042->0.00029 | angle 0.072->0.050 | tch 0.046->0.046 | po 0.060->0.042 | Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 008] ↘️ 步长衰减：cell 0.00029->0.00021 | angle 0.050->0.035 | tch 0.046->0.046 | po 0.042->0.042 | Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 009] ↘️ 步长衰减：cell 0.00021->0.00014 | angle 0.035->0.035 | tch 0.046->0.046 | po 0.042->0.042 | Rwp=7.09% | score=7.09
+[精调 (Stage 3) | A-Loop 010] ⛳ 已到最小步长阈值，结束 A 段。
+[精调 (Stage 3) | B-Loop 001] ✅ atoms main.cif group#4 z -0.0125 → Rwp=7.09%  pos_step=0.0125 mix_step=0.090
+[精调 (Stage 3) | B-Loop 002] ↘️ 步长衰减：pos 0.0125->0.0087 | mix 0.090->0.063 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 003] ↘️ 步长衰减：pos 0.0087->0.0061 | mix 0.063->0.044 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 004] ↘️ 步长衰减：pos 0.0061->0.0043 | mix 0.044->0.031 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 005] ↘️ 步长衰减：pos 0.0043->0.0030 | mix 0.031->0.022 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 006] ↘️ 步长衰减：pos 0.0030->0.0021 | mix 0.022->0.015 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 007] ↘️ 步长衰减：pos 0.0021->0.0015 | mix 0.015->0.011 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 008] ↘️ 步长衰减：pos 0.0015->0.0015 | mix 0.011->0.007 | Rwp=7.09% 
+[精调 (Stage 3) | B-Loop 009] ⛳ 已到最小步长阈值，结束 B 段。
+✅ 阶段完成：精调 (Stage 3) | 当前 Rwp=7.09% | score=7.09
+🧊 阶段保温：精调 (Stage 3) 结果已保存，将传入下一阶段。
+📁 已生成 refine_log.csv
+📈 已保存 Rwp_curve.png
+📈 已保存 phase_fraction_curve.png
+📈 已保存 scale_curve.png
+🖼️ 拟合图已保存：yfsf_Refined.png
+💾 已保存拟合曲线数据：yfsf_Refined.xy
+💾 已导出精修 CIF: yfsf_refined_cifs/main_refined.cif
+💾 已导出精修 CIF: yfsf_refined_cifs/ZnO_refined.cif
+💾 已导出精修 CIF: yfsf_refined_cifs/La(OH)3_refined.cif
+
+📈 最终指标：Rwp = 7.09% 
+📊 相分数（softmax）与每相独立 scale：
+   main.cif                     frac= 71.10% | scale=0.570
+   ZnO.cif                      frac= 21.49% | scale=0.390
+   La(OH)3.cif                  frac=  7.41% | scale=0.276
+📌 择优取向（March–Dollase）参数：
+   main.cif                     axis=[0,0,1] | r=1.4000
+   ZnO.cif                      axis=[0,0,1] | r=1.0000
+   La(OH)3.cif                  axis=[0,0,1] | r=1.5288

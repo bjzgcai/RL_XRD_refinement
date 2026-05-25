@@ -1,0 +1,19 @@
+=== yfsf_Refined ===
+XY file   : /home/dataset-assist-0/Three-stage-refinement/precursor/benchmark_run/NiO_0p6007-Bi2O3_0p4008--8min/sample.xy
+Final Rwp : 7.948%
+TCH params (final): U=0.0589906, V=0.1, W=0.15, X=0.15, Y=0.17294
+
+Phases (fractions & per-phase scales):
+  main.cif                     frac= 57.90% | scale=0.7108
+  Bi2O3.cif                    frac= 42.10% | scale=0.6816
+
+Preferred Orientation (March–Dollase):
+  bounds: r in [0.30, 3.00]
+  main.cif                     axis=[0,0,1] | r=1.3804
+  Bi2O3.cif                    axis=[0,0,1] | r=1.1310
+
+Stoichiometry target (phase=main.cif): {'Ni': 4.0, 'O': 4.0}
+
+Exported CIFs:
+  yfsf_refined_cifs/main_refined.cif
+  yfsf_refined_cifs/Bi2O3_refined.cif

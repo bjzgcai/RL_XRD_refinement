@@ -1,0 +1,6 @@
+# database_opXRD sample folders:
+# keep only the original pattern data files, ignore generated refinement outputs.
+/database_opXRD/*/*
+!/database_opXRD/*/pattern_*.cif
+!/database_opXRD/*/pattern_*.xy
+!/database_opXRD/*/pattern_*.json
