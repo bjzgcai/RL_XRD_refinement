@@ -1,23 +1,23 @@
 # yfs_XRD_refinement
 
-版本：v1
+Version: v1
 
-本项目用于对 XRD 谱图进行自动化精修。当前主要入口有两个：
+This project provides automated refinement tools for XRD patterns. The current repository contains two main entry scripts:
 
-- `yfs_XRD.py`：常规多阶段自动精修版本。
-- `QL_yfs_XRD.py`：在常规流程基础上加入 Q-Learning 动作选择的版本，适合尝试更智能的参数搜索。
+- `yfs_XRD.py`: standard multi-stage automated refinement.
+- `QL_yfs_XRD.py`: a Q-Learning enhanced version based on the standard workflow, intended for more adaptive parameter search.
 
-两个脚本都会读取实验谱 `.xy` 文件、主相 CIF 文件和可选杂相 CIF 目录，自动进行候选杂相筛选、相组合搜索、峰形/晶胞/原子位置/占位/择优取向等参数优化，并输出拟合图、拟合曲线、精修报告和精修后的 CIF。
+Both scripts read an experimental `.xy` pattern, a main-phase CIF file, and an optional impurity-phase CIF folder. They perform candidate impurity screening, phase-combination search, peak-shape fitting, unit-cell refinement, atomic-position refinement, occupancy refinement, preferred-orientation refinement, and final result export.
 
-## 环境安装
+## Installation
 
-建议先创建独立 Python 环境，然后安装依赖：
+It is recommended to use an isolated Python environment. Install dependencies with:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-主要依赖包括：
+Main dependencies:
 
 - `numpy`
 - `scipy`
@@ -25,11 +25,11 @@ pip install -r requirements.txt
 - `matplotlib`
 - `pymatgen`
 
-程序会自动检测是否可用 CUDA；如果可用，会优先使用 GPU，否则使用 CPU。
+The program automatically checks whether CUDA is available. If CUDA is available, GPU will be used; otherwise, CPU will be used.
 
-## 输入文件准备
+## Input Files
 
-推荐在一个样品目录中放置以下文件：
+A typical sample folder should look like this:
 
 ```text
 sample_dir/
@@ -40,55 +40,55 @@ sample_dir/
     impurity_2.cif
 ```
 
-说明：
+File descriptions:
 
-- `.xy` 文件：实验 XRD 谱，至少两列，第一列为 `2Theta`，第二列为强度。
-- 主相 CIF：用 `--main` 指定，例如 `main.cif`。
-- 杂相目录：用 `--imp` 指定，例如 `impure_phase`。目录下所有 `.cif` 会作为候选杂相参与筛选。
-- 如果不指定 `--xy`，程序会自动选择当前目录下按文件名排序的第一个 `.xy` 文件。
+- `.xy` file: experimental XRD pattern. It should contain at least two columns: the first column is `2Theta`, and the second column is intensity.
+- Main-phase CIF: specified by `--main`, for example `main.cif`.
+- Impurity-phase folder: specified by `--imp`, for example `impure_phase`. All `.cif` files in this folder are treated as candidate impurity phases.
+- If `--xy` is not specified, the program automatically selects the first `.xy` file in the current directory after sorting by filename.
 
-## 基本用法
+## Basic Usage
 
-进入样品目录后运行：
+Run the standard refinement script from a sample folder:
 
 ```bash
 python yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
 ```
 
-使用 Q-Learning 版本：
+Run the Q-Learning version:
 
 ```bash
 python QL_yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
 ```
 
-如果只做单相精修，可以不提供杂相目录：
+For single-phase refinement, the impurity folder can be omitted:
 
 ```bash
 python yfs_XRD.py --xy sample.xy --main main.cif
 ```
 
-## 常用参数
+## Common Arguments
 
-两个脚本都支持：
-
-```bash
---xy              实验谱文件，格式为 .xy
---main            主相 CIF 文件
---imp             杂相 CIF 文件夹
---num-workers     并行进程数，默认使用 CPU 核心数
---main-bias       主相偏置系数，只影响相组合筛选阶段，默认 1.0
---stoich-phase    化学计量约束参考相，通常与主相相同
---stoich          目标化学计量比，例如 "Li:6,S:5,P:1,Cl:1"
---lambda-stoich   化学计量约束强度，默认 0.5
-```
-
-`QL_yfs_XRD.py` 额外支持：
+Both scripts support:
 
 ```bash
---wl              X-ray 波长，默认 1.5406 Angstrom
+--xy              Experimental pattern file in .xy format
+--main            Main-phase CIF file
+--imp             Folder containing impurity-phase CIF files
+--num-workers     Number of parallel workers; defaults to CPU core count
+--main-bias       Main-phase bias used only during phase-combination screening; default is 1.0
+--stoich-phase    Reference phase for stoichiometry constraints, usually the main phase
+--stoich          Target stoichiometry, for example "Li:6,S:5,P:1,Cl:1"
+--lambda-stoich   Stoichiometry constraint strength; default is 0.5
 ```
 
-示例：
+`QL_yfs_XRD.py` additionally supports:
+
+```bash
+--wl              X-ray wavelength in Angstrom; default is 1.5406
+```
+
+Example:
 
 ```bash
 python QL_yfs_XRD.py \
@@ -101,66 +101,66 @@ python QL_yfs_XRD.py \
   --lambda-stoich 0.5
 ```
 
-## 输出文件
+## Output Files
 
-运行完成后，常见输出包括：
+Common output files include:
 
 ```text
-yfsf_Refined.png          最终拟合图
-yfsf_Refined.xy           实验谱与拟合谱数据
-yfsf_Refined.txt          最终报告，包含 Rwp、相分数、scale、TCH 参数等
-yfsf_refined_cifs/        精修后的 CIF 文件
-refine_log.csv            精修过程日志
-Rwp_curve.png             Rwp 变化曲线
-phase_fraction_curve.png  相分数变化曲线
-scale_curve.png           scale 变化曲线
+yfsf_Refined.png          Final refinement plot
+yfsf_Refined.xy           Experimental and fitted pattern data
+yfsf_Refined.txt          Final report with Rwp, phase fractions, scale factors, TCH parameters, etc.
+yfsf_refined_cifs/        Refined CIF files
+refine_log.csv            Refinement process log
+Rwp_curve.png             Rwp curve
+phase_fraction_curve.png  Phase-fraction curve
+scale_curve.png           Scale-factor curve
 ```
 
-`yfs_XRD.py` 还会保存阶段结果，例如：
+`yfs_XRD.py` also saves intermediate stage results, such as:
 
 ```text
 stage1_output/
 stage2_output/
 ```
 
-这些目录中包含阶段拟合图、阶段拟合曲线、阶段报告和阶段 CIF。
+These folders contain stage-wise plots, fitted curves, text reports, and CIF files.
 
-## 两个脚本如何选择
+## Which Script Should I Use?
 
-优先建议先运行：
+Start with the standard version:
 
 ```bash
 python yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
 ```
 
-如果常规版本陷入局部最优、某些参数调整效果不稳定，或希望尝试强化学习动作选择，再运行：
+If the standard version appears trapped in a local optimum, if parameter updates are unstable, or if you want to try reinforcement-learning based action selection, run:
 
 ```bash
 python QL_yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
 ```
 
-`QL_yfs_XRD.py` 的搜索过程通常更复杂，运行时间可能更长。
+`QL_yfs_XRD.py` usually performs a more complex search and may take longer to run.
 
-## 精修效果不佳时的建议
+## If Refinement Quality Is Poor
 
-如果最终 Rwp 偏高、背景拟合异常、低角度背景过强，或拟合曲线明显被背景拖偏，可以先手动扣除背景，再用扣背景后的 `.xy` 文件重新运行精修。
+If the final Rwp is high, the background fit looks abnormal, the low-angle background is too strong, or the fitted curve is clearly distorted by background intensity, manually subtract the background first and then rerun the refinement using the background-subtracted `.xy` file.
 
-推荐流程：
+Recommended workflow:
 
-1. 用常用 XRD 软件或自己的脚本对原始谱图进行背景扣除。
-2. 导出新的两列 `.xy` 文件，仍保持第一列为 `2Theta`，第二列为扣背景后的强度。
-3. 用新的 `.xy` 文件重新运行：
+1. Use common XRD software or your own script to subtract the background from the raw pattern.
+2. Export a new two-column `.xy` file. Keep the first column as `2Theta` and the second column as the background-subtracted intensity.
+3. Rerun refinement with the new `.xy` file:
 
 ```bash
 python yfs_XRD.py --xy sample_bg_removed.xy --main main.cif --imp impure_phase
 ```
 
-如果扣背景后仍然效果不佳，可以继续检查主相 CIF 是否正确、候选杂相是否完整、波长是否匹配，以及是否存在明显择优取向或峰位系统偏移。
+If the result is still unsatisfactory after background subtraction, check whether the main-phase CIF is correct, whether the candidate impurity phases are complete, whether the wavelength is correct, and whether there is strong preferred orientation or systematic peak shift.
 
-## 注意事项
+## Notes
 
-- `.xy` 强度会在程序内部归一化。
-- 候选杂相越多，组合搜索和精修时间越长。
-- `--num-workers` 不宜超过机器可承受范围，过大可能导致内存压力。
-- `--stoich` 格式必须为英文冒号和英文逗号，例如 `"Li:6,S:5,P:1,Cl:1"`。
-- 如果 CIF 中缺少 `Uiso`，程序会使用默认值并在导出时尽量补齐。
+- `.xy` intensities are normalized internally.
+- More candidate impurity phases increase the phase-combination search time and total refinement time.
+- Avoid setting `--num-workers` higher than the machine can handle, as too many workers may cause high memory usage.
+- The `--stoich` format must use English colons and commas, for example `"Li:6,S:5,P:1,Cl:1"`.
+- If a CIF file does not contain `Uiso`, the program uses a default value and attempts to complete the field during CIF export.
