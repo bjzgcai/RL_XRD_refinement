@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # ============================================
 # QL-yfsf.py
 # ============================================
@@ -752,7 +753,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                      stoich_phase_key: Optional[str]=None,
                      stoich_target: Optional[Dict[str, float]]=None,
                      # stage loops
-                     stage_loops=(300, 100, 150),
+                     stage_loops=(60, 100, 150),
                      device=None,
                      num_workers: int = os.cpu_count()):
     
@@ -1010,38 +1011,50 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             # 阶段设置（步长比例 + 循环次数 ）
             stage_settings = [
                 {"name": "粗调 (Stage 1)",
-                    "cell_scale": 1.5, "angle_scale": 1.5, "tch_scale": 2.0,          
-                    "pos_scale": 1.0, "mix_scale": 0.8, "po_scale": 2.0,
-                    "loops": stage_loops[0], }
+                    "cell_scale": 1.5, "angle_scale": 1.5, "tch_scale": 1.8,
+                    "pos_scale": 4.0, "mix_scale": 2.5, "po_scale": 1.6,
+                    "loops": stage_loops[0], },
+                {"name": "微调 (Stage 2)",
+                    "cell_scale": 1.0, "angle_scale": 1.2, "tch_scale": 1.2,
+                    "pos_scale": 3.0, "mix_scale": 2.0, "po_scale": 1.2,
+                    "loops": stage_loops[1], },
+                {"name": "精调 (Stage 3)",
+                    "cell_scale": 0.7, "angle_scale": 1.0, "tch_scale": 0.9,
+                    "pos_scale": 2.5, "mix_scale": 1.8, "po_scale": 1.0,
+                    "loops": stage_loops[2], },
             ]
-
-            # ✅ 只跑一段：只保留粗调 Stage 1
-            stage_settings = stage_settings[:1]
 
             for stg in stage_settings:
                 print(f"\n🚀 进入阶段：{stg['name']} | loops={stg['loops']} ")
 
+                # ✅ 阶段保温读取
+                if 'stage_state' in locals():
+                    phase_structs = stage_state["phase_structs"]
+                    tpars = stage_state["tpars"]
+                    po_r = stage_state["po_r"]
+                    yfit = stage_state["yfit"]
+                    fr = stage_state["fr"]
+                    sf = stage_state["sf"]
+                    print(f"♻️ 已载入上一阶段的结构与比例，作为 {stg['name']} 初始状态。")
 
                 # =====================================================
                 # StepA + StepB 串行执行
                 # =====================================================
                 print(f"\n▶️ {stg['name']} StepA：结构拟合阶段（λ_stoich=0.0）")
-                reset_profile_cache(f"{stg['name']}-before-StepA")
                 best_score, yfit, fr, sf, r_best, _ = inner_once(
                     phase_structs, tpars, po_r,
                     freeze_scale=False,
                     stage_name=f"{stg['name']}-StepA",
                     lambda_stoich=0.0
                 )
-                rwp_trend_history = [r_best]
+
                 print(f"✅ StepA 完成：Rwp={r_best:.2f}% | score={best_score:.2f}")
-
-
                 current_step = "StepA"
 
+                # ✅ 新增：保存 StepA 的 logits 向量（取 log(frac)）
+                global_logits = torch.tensor(np.log(fr + 1e-9), dtype=torch.float32).to(device)
                 if stg["name"] == "粗调 (Stage 1)":
                     print(f"{stg['name']} StepB：化学计量修正（λ_stoich={lambda_stoich})")
-                    reset_profile_cache(f"{stg['name']}-before-StepB")   # ✅ 新增：Loop-B / StepB 前清缓存
                     best_score, yfit, fr, sf, r_best, _ = inner_once(
                         phase_structs, tpars, po_r,
                         freeze_scale=False,
@@ -1049,7 +1062,6 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                         lambda_stoich=lambda_stoich
                     )
                     print(f"✅ StepB 完成：Rwp={r_best:.2f}% | score={best_score:.2f}")
-
                 else:
                     print(f"⛔ 跳过 {stg['name']} 的 StepB（避免破坏结构）")
 
@@ -1064,343 +1076,396 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
 
                 # =========================
                 # A) 先优化 Cell + Angles + TCH + PO(r)
-                # =========================           
+                # =========================
                 for loop in range(1, stg["loops"] + 1):
-                    # 获取当前状态
-                    current_state = get_refine_state()
-                    # 让 Agent 选择一个动作 (0-6)
-                    action_selected = agent.choose_action(current_state)
-                    
-                    # 记录动作执行前的分数，用于计算 Reward
-                    score_before = best_score
-                    
-                    loop_label = f"RL-Action:{action_selected}"
-                    improved = False
-                    
-                    # 打印一下当前的决策，方便监控
-                    if loop % 10 == 0:
-                        print(f"--- [RL Decision] Loop {loop} | State: {current_state} | Chosen Action: {action_selected} ---")
                     loop_label = current_step if 'current_step' in locals() else ''
                     improved = False
 
-                    # Action 0: --- Cell (a,b,c)
-                    if action_selected == 0:
-                        if cell_step >= min_cell_step_frac:
-                            for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
-                                a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
-                                for p_name in ("a","b","c"):
-                                    best_local = (best_score, 0.0); best_state=None; best_metrics=None
-                                    for sgn in (-1.0, +1.0):
-                                        delta = sgn*cell_step
-                                        a,b,c = a0,b0,c0
-                                        if p_name=="a": a=a0*(1+delta)
-                                        if p_name=="b": b=b0*(1+delta)
-                                        if p_name=="c": c=c0*(1+delta)
-                                        st_try = sync_uiso(set_cell_abc(st0, a,b,c))
-                                        structs_try = dict(phase_structs); structs_try[key]=st_try
-                                        score_try, yfit_try, fr_try, sf_try, r_try,  _ = inner_once(structs_try, tpars, po_r,
-                                                                                                    freeze_scale= False,
-                                                                                                    stage_name=stg["name"])
-                                        if score_try + 1e-3 < best_local[0]:
-                                            best_local=(score_try,delta); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
-                                    if best_state and best_local[0] + 1e-6 < best_score:
-                                        phase_structs, yfit, fr, sf, r_best = best_state
-                                        best_score = best_local[0]; improved=True
-                                        print(f"[{stg['name']} | {loop_label} | A-Loop {loop:03d}] ✅ cell {os.path.basename(key)}.{p_name} "
-                                                f"{best_local[1]*100:+.3f}% → Rwp={r_best:.2f}% | score={best_score:.2f}")
+                    # --- Cell (a,b,c)
+                    if cell_step >= min_cell_step_frac:
+                        for key in list(phase_structs.keys()):
+                            st0 = phase_structs[key]
+                            a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
+                            for p_name in ("a","b","c"):
+                                best_local = (best_score, 0.0); best_state=None; best_metrics=None
+                                for sgn in (-1.0, +1.0):
+                                    delta = sgn*cell_step
+                                    a,b,c = a0,b0,c0
+                                    if p_name=="a": a=a0*(1+delta)
+                                    if p_name=="b": b=b0*(1+delta)
+                                    if p_name=="c": c=c0*(1+delta)
+                                    st_try = sync_uiso(set_cell_abc(st0, a,b,c))
+                                    structs_try = dict(phase_structs); structs_try[key]=st_try
+                                    score_try, yfit_try, fr_try, sf_try, r_try,  _ = inner_once(structs_try, tpars, po_r,
+                                                                                                freeze_scale= False,
+                                                                                                stage_name=stg["name"])
+                                    if score_try + 1e-3 < best_local[0]:
+                                        best_local=(score_try,delta); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
+                                if best_state and best_local[0] + 1e-6 < best_score:
+                                    phase_structs, yfit, fr, sf, r_best = best_state
+                                    best_score = best_local[0]; improved=True
+                                    print(f"[{stg['name']} | {loop_label} | A-Loop {loop:03d}] ✅ cell {os.path.basename(key)}.{p_name} "
+                                            f"{best_local[1]*100:+.3f}% → Rwp={r_best:.2f}% | score={best_score:.2f}")
 
-                    # Action 1:--- Angles (α,β,γ)
-                    elif action_selected == 1:
-                        if angle_step >= min_angle_step_deg:
-                            for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
-                                a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
-                                for p_name in ("alpha","beta","gamma"):
-                                    best_local=(best_score,0.0); best_state=None; best_metrics=None
-                                    for sgn in (-1.0,+1.0):
-                                        delta = sgn*angle_step
-                                        al,be,ga = al0,be0,ga0
-                                        if p_name=="alpha": al=float(np.clip(al0+delta, ANG_MIN, ANG_MAX))
-                                        if p_name=="beta":  be=float(np.clip(be0+delta, ANG_MIN, ANG_MAX))
-                                        if p_name=="gamma": ga=float(np.clip(ga0+delta, ANG_MIN, ANG_MAX))
-                                        st_try = sync_uiso(set_cell_abc_angles(st0, a0, b0, c0, al, be, ga))
-                                        structs_try = dict(phase_structs); structs_try[key]=st_try
-                                        score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(structs_try, tpars, po_r,
-                                                                                                    freeze_scale= False,
-                                                                                                    stage_name=stg["name"])
-                                        if score_try + 1e-4 < best_local[0]:
-                                            best_local=(score_try,delta); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
-                                    if best_state and best_local[0] + 1e-6 < best_score:
-                                        phase_structs, yfit, fr, sf, r_best = best_state
-                                        best_score = best_local[0]; improved=True
-                                        print(f"[{stg['name']} | A-Loop {loop:03d}| {loop_label}] ✅ angle {os.path.basename(key)}.{p_name} "
-                                                f"{best_local[1]:+.3f}° → Rwp={r_best:.2f}% | score={best_score:.2f}")
-
-                    # Action 2:--- TCH (U,V,W,X,Y)
-                    elif action_selected == 2:
-                        if tch_step >= min_tch_step_frac:
-                            for name in ("U","V","W","X","Y"):
-                                base = tpars[name]
+                    # --- Angles (α,β,γ)
+                    if angle_step >= min_angle_step_deg:
+                        for key in list(phase_structs.keys()):
+                            st0 = phase_structs[key]
+                            a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
+                            for p_name in ("alpha","beta","gamma"):
                                 best_local=(best_score,0.0); best_state=None; best_metrics=None
                                 for sgn in (-1.0,+1.0):
-                                    delta = sgn*tch_step
-                                    val = base*(1.0+delta)
-                                    # ===== TCH 限幅（尝试值也必须限制） =====
-                                    if name == "U": val = float(np.clip(val, 0.0001, 0.15))
-                                    elif name == "V": val = float(np.clip(val, -0.10,  0.10))
-                                    elif name == "W": val = float(np.clip(val, 0.0001, 0.15))
-                                    elif name == "X": val = float(np.clip(val, 0.0001, 0.15))
-                                    elif name == "Y": val = float(np.clip(val, 0.0001, 0.25))
-                                    t_try = dict(tpars); t_try[name]=val
-                                    score_try, yfit_try, fr_try, sf_try, r_try,  _ = inner_once(phase_structs, t_try, po_r,
+                                    delta = sgn*angle_step
+                                    al,be,ga = al0,be0,ga0
+                                    if p_name=="alpha": al=float(np.clip(al0+delta, ANG_MIN, ANG_MAX))
+                                    if p_name=="beta":  be=float(np.clip(be0+delta, ANG_MIN, ANG_MAX))
+                                    if p_name=="gamma": ga=float(np.clip(ga0+delta, ANG_MIN, ANG_MAX))
+                                    st_try = sync_uiso(set_cell_abc_angles(st0, a0,b0,c0, al,be,ga))
+                                    structs_try = dict(phase_structs); structs_try[key]=st_try
+                                    score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(structs_try, tpars, po_r,
                                                                                                 freeze_scale= False,
                                                                                                 stage_name=stg["name"])
-
-                                    if score_try + 1e-3 < best_local[0]:
-                                        best_local = (score_try, delta)
-                                        best_state = (t_try, yfit_try, fr_try, sf_try, r_try)
-                                if best_state is not None and best_local[0] + 1e-6 < best_score:
-                                        tpars, yfit, fr, sf, r_best = best_state
-                                        best_score = best_local[0]
-                                        improved = True
-                                        print(f"[{stg['name']} | A-Loop {loop:03d}] ✅ TCH {name} {best_local[1]*100:+.1f}% "
-                                            f"→ Rwp={r_best:.2f}% | score={best_score:.2f}")
-
-
-                    # Action 3:--- PO (r) 每相独立（乘性步长，边界 [po_r_bounds]）
-                    elif action_selected == 3:
-                        if enable_po and po_step >= min_po_step_frac:
-                            for key in list(phase_structs.keys()):
-                                r0 = po_r[key]
-                                best_local=(best_score,0.0); best_state=None; best_metrics=None
-                                for sgn in (-1.0, +1.0):
-                                    delta = sgn*po_step
-                                    r_try_val = float(np.clip(r0*(1.0+delta), po_r_bounds[0], po_r_bounds[1]))
-                                    po_r_try = dict(po_r); po_r_try[key] = r_try_val
-                                    score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(phase_structs, tpars, po_r_try,
-                                                                                                freeze_scale= False,
-                                                                                                stage_name=stg["name"])
-                                    if score_try + 1e-3 < best_local[0]:
-                                        best_local=(score_try, r_try_val); best_state=(po_r_try, yfit_try, fr_try, sf_try, r_try); 
+                                    if score_try + 1e-4 < best_local[0]:
+                                        best_local=(score_try,delta); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
                                 if best_state and best_local[0] + 1e-6 < best_score:
-                                    po_r, yfit, fr, sf, r_best = best_state
+                                    phase_structs, yfit, fr, sf, r_best = best_state
                                     best_score = best_local[0]; improved=True
-                                    print(f"[{stg['name']} | A-Loop {loop:03d}] ✅ PO r {os.path.basename(key)} "
-                                            f"→ r={best_local[1]:.3f} | Rwp={r_best:.2f}% | score={best_score:.2f}")
+                                    print(f"[{stg['name']} | A-Loop {loop:03d}| {loop_label}] ✅ angle {os.path.basename(key)}.{p_name} "
+                                            f"{best_local[1]:+.3f}° → Rwp={r_best:.2f}% | score={best_score:.2f}")
+
+                    # --- TCH (U,V,W,X,Y)
+                    if tch_step >= min_tch_step_frac:
+                        for name in ("U","V","W","X","Y"):
+                            base = tpars[name]
+                            best_local=(best_score,0.0); best_state=None; best_metrics=None
+                            for sgn in (-1.0,+1.0):
+                                delta = sgn*tch_step
+                                val = base*(1.0+delta)
+                                # ===== TCH 限幅（尝试值也必须限制） =====
+                                if name == "U": val = float(np.clip(val, 0.0001, 0.15))
+                                elif name == "V": val = float(np.clip(val, -0.10,  0.10))
+                                elif name == "W": val = float(np.clip(val, 0.0001, 0.15))
+                                elif name == "X": val = float(np.clip(val, 0.0001, 0.15))
+                                elif name == "Y": val = float(np.clip(val, 0.0001, 0.25))
+                                t_try = dict(tpars); t_try[name]=val
+                                score_try, yfit_try, fr_try, sf_try, r_try,  _ = inner_once(phase_structs, t_try, po_r,
+                                                                                            freeze_scale= False,
+                                                                                            stage_name=stg["name"])
+
+                                if score_try + 1e-3 < best_local[0]:
+                                    best_local = (score_try, delta)
+                                    best_state = (t_try, yfit_try, fr_try, sf_try, r_try)
+                            if best_state is not None and best_local[0] + 1e-6 < best_score:
+                                    tpars, yfit, fr, sf, r_best = best_state
+                                    best_score = best_local[0]
+                                    improved = True
+                                    print(f"[{stg['name']} | A-Loop {loop:03d}] ✅ TCH {name} {best_local[1]*100:+.1f}% "
+                                        f"→ Rwp={r_best:.2f}% | score={best_score:.2f}")
+
+
+                    # --- PO (r) 每相独立（乘性步长，边界 [po_r_bounds]）
+                    if enable_po and po_step >= min_po_step_frac:
+                        for key in list(phase_structs.keys()):
+                            r0 = po_r[key]
+                            best_local=(best_score,0.0); best_state=None; best_metrics=None
+                            for sgn in (-1.0, +1.0):
+                                delta = sgn*po_step
+                                r_try_val = float(np.clip(r0*(1.0+delta), po_r_bounds[0], po_r_bounds[1]))
+                                po_r_try = dict(po_r); po_r_try[key] = r_try_val
+                                score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(phase_structs, tpars, po_r_try,
+                                                                                            freeze_scale= False,
+                                                                                            stage_name=stg["name"])
+                                if score_try + 1e-3 < best_local[0]:
+                                    best_local=(score_try, r_try_val); best_state=(po_r_try, yfit_try, fr_try, sf_try, r_try); 
+                            if best_state and best_local[0] + 1e-6 < best_score:
+                                po_r, yfit, fr, sf, r_best = best_state
+                                best_score = best_local[0]; improved=True
+                                print(f"[{stg['name']} | A-Loop {loop:03d}] ✅ PO r {os.path.basename(key)} "
+                                        f"→ r={best_local[1]:.3f} | Rwp={r_best:.2f}% | score={best_score:.2f}")
+
+                    # 若本轮无提升，则衰减步长
+                    if not improved:
+                        did_decay=False
+                        prev = (cell_step, angle_step, tch_step, po_step)
+                        if cell_step  >= min_cell_step_frac: cell_step  *= 0.7; did_decay=True
+                        if angle_step >= min_angle_step_deg: angle_step *= 0.7; did_decay=True
+                        if tch_step   >= min_tch_step_frac:  tch_step   *= 0.7; did_decay=True
+                        if po_step    >= min_po_step_frac:   po_step    *= 0.7; did_decay=True
+                        if did_decay:
+                            print(f"[{stg['name']} | A-Loop {loop:03d}] ↘️ 步长衰减："
+                                    f"cell {prev[0]:.5f}->{cell_step:.5f} | angle {prev[1]:.3f}->{angle_step:.3f} | "
+                                    f"tch {prev[2]:.3f}->{tch_step:.3f} | po {prev[3]:.3f}->{po_step:.3f} "
+                                    f"| Rwp={r_best:.2f}% | score={best_score:.2f}")
+                        else:
+                            print(f"[{stg['name']} | A-Loop {loop:03d}] ⛳ 已到最小步长阈值，结束 A 段。")
+                            break
 
                 # =========================
                 # B) 再优化 Atoms + Mixed Occupancy
                 # =========================
-                    # Action 4:--- Atoms xyz（按等价位组微调）
-                    elif action_selected == 4:
-                        if pos_step >= min_pos_step:
-                            for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
-                                # 粗调：使用初始化时冻结的 Wyckoff 分组，严格跟随原空间群
-                                if stg["name"] == "粗调 (Stage 1)":
-                                    groups = fixed_groups_map[key]
-                                # # 精调：打开硬分组，按当前结构重新分组（甚至可以改成每个原子一组）
-                                # elif stg["name"] == "精调 (Stage 3)":
-                                #     # 方案 A：按当前结构重新用 SpacegroupAnalyzer 分组（可能接近 P1）
+                for loop in range(1, stg["loops"] + 1):
+                    improved = False
 
-                                #     # 👉 如果你想“完全每个原子单独调”，可以改成下面这一行：
-                                #     groups = fixed_groups_map[key]
-                                #     #groups = [[i] for i in range(len(st0.sites))]
-                                # # 微调（Stage 2）：保持固定分组
-                                # else:
-                                #     #groups = groups = get_equivalent_groups(st0)
-                                #     groups = fixed_groups_map[key]
-                                for gidx, group in enumerate(groups):
-                                    for axis, vec in zip(("x","y","z"), [(1,0,0),(0,1,0),(0,0,1)]):
-                                        best_local=(best_score,0.0); best_state=None; best_metrics=None
-                                        for sgn in (-1.0,+1.0):
-                                            delta = sgn*pos_step
-                                            dx,dy,dz = delta*vec[0], delta*vec[1], delta*vec[2]
-                                            st_try = sync_uiso(structure_with_shifted_group(st0, group, dx,dy,dz))
-                                            structs_try = dict(phase_structs); structs_try[key]=st_try
-                                            score_try, yfit_try, fr_try, sf_try, r_try,  _ = inner_once(structs_try, tpars, po_r,
-                                                                                                        freeze_scale= False,
-                                                                                                        stage_name=stg["name"])
-                                            if score_try + 5e-4 < best_local[0]:
-                                                best_local=(score_try,delta); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
-                                        if best_state and best_local[0] + 1e-6 < best_score:
-                                            phase_structs, yfit, fr, sf, r_best = best_state
-                                            best_score = best_local[0]; improved=True
-                                            print(f"[{stg['name']} | B-Loop {loop:03d}] ✅ atoms {os.path.basename(key)} "
-                                                    f"group#{gidx} {axis} {best_local[1]:+.4f} → Rwp={r_best:.2f}%  "
-                                                    f"pos_step={pos_step:.4f} mix_step={mix_step:.3f}")
-                    
-                    # Action 5:--- Uiso（原子热振动）微调模块---
-                    elif action_selected == 5:
-                        UISO_REFINE_ENABLE = True
-                        UISO_ONLY_LAST_LOOP = False     # 方案A：只在最后一轮做一次
-                        UISO_EVERY_N_LOOP = 1          # 方案B：如果想周期性做，比如 20，就填 20；不用就保持 0
+                    # --- Atoms xyz（按等价位组微调）
+                    if pos_step >= min_pos_step:
+                        for key in list(phase_structs.keys()):
+                            st0 = phase_structs[key]
+                            # 粗调：使用初始化时冻结的 Wyckoff 分组，严格跟随原空间群
+                            if stg["name"] == "粗调 (Stage 1)":
+                                groups = fixed_groups_map[key]
+                            # 精调：打开硬分组，按当前结构重新分组（甚至可以改成每个原子一组）
+                            elif stg["name"] == "精调 (Stage 3)":
+                                # 方案 A：按当前结构重新用 SpacegroupAnalyzer 分组（可能接近 P1）
 
-                        do_uiso = False
-                        if UISO_REFINE_ENABLE:
-                            if UISO_ONLY_LAST_LOOP and (loop == stg["loops"]):
-                                do_uiso = True
-                            elif (UISO_EVERY_N_LOOP and (loop % UISO_EVERY_N_LOOP == 0)):
-                                do_uiso = True
+                                # 👉 如果你想“完全每个原子单独调”，可以改成下面这一行：
+                                groups = [[i] for i in range(len(st0.sites))]
+                            # 微调（Stage 2）：保持固定分组
+                            else:
+                                groups = groups = get_equivalent_groups(st0)
+                            for gidx, group in enumerate(groups):
+                                for axis, vec in zip(("x","y","z"), [(1,0,0),(0,1,0),(0,0,1)]):
+                                    best_local=(best_score,0.0); best_state=None; best_metrics=None
+                                    for sgn in (-1.0,+1.0):
+                                        delta = sgn*pos_step
+                                        dx,dy,dz = delta*vec[0], delta*vec[1], delta*vec[2]
+                                        st_try = sync_uiso(structure_with_shifted_group(st0, group, dx,dy,dz))
+                                        structs_try = dict(phase_structs); structs_try[key]=st_try
+                                        score_try, yfit_try, fr_try, sf_try, r_try,  _ = inner_once(structs_try, tpars, po_r,
+                                                                                                    freeze_scale= False,
+                                                                                                    stage_name=stg["name"])
+                                        if score_try + 5e-4 < best_local[0]:
+                                            best_local=(score_try,delta); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
+                                    if best_state and best_local[0] + 1e-6 < best_score:
+                                        phase_structs, yfit, fr, sf, r_best = best_state
+                                        best_score = best_local[0]; improved=True
+                                        print(f"[{stg['name']} | B-Loop {loop:03d}] ✅ atoms {os.path.basename(key)} "
+                                                f"group#{gidx} {axis} {best_local[1]:+.4f} → Rwp={r_best:.2f}%  "
+                                                f"pos_step={pos_step:.4f} mix_step={mix_step:.3f}")
+                    # --- Uiso（原子热振动）微调模块 ---
+                    u_step = pos_step * 0.5
+                    min_u = 0.0005
+                    max_u = 0.05
 
-                        if do_uiso:
-                            # ⚠️ 原来 u_step = pos_step * 0.5 在粗调早期太大，容易试探失败还不输出
-                            u_step = 0.01 
-                            min_u = 0.01
-                            max_u = 1.0
+                    # 为整个 Uiso 搜索准备一个全局 best
+                    best_local_uiso = (best_score, None)
 
-                            best_local_uiso = (best_score, None)
+                    # 遍历所有相
+                    for key in list(phase_structs.keys()):
+                        st0 = phase_structs[key]
 
-                            # 统计：元素 -> [(phase_key, site_index, occ)]
-                            elem_map = {}
-                            for pkey, st0 in phase_structs.items():
-                                for sidx, site in enumerate(st0.sites):
-                                    for sp, occ in site.species.items():
-                                        ek = str(sp)   # 仍然是“按元素分组”的逻辑
-                                        elem_map.setdefault(ek, []).append((pkey, sidx, float(occ)))
+                        # 遍历所有 site
+                        for sidx, site in enumerate(st0.sites):
 
-                            for elem, refs in elem_map.items():
-                                # 当前该元素的“加权平均 U0”
-                                num = 0.0
-                                den = 0.0
-                                for pkey, sidx, occ in refs:
-                                    U0_site = float(phase_structs[pkey].sites[sidx].properties.get("_Uiso", 0.01))
-                                    num += occ * U0_site
-                                    den += occ
-                                U0_elem = num / max(den, 1e-12)
+                            U0 = float(site.properties.get("_Uiso", 0.01))
 
-                                for sgn in (-1.0, +1.0):
-                                    U_try = float(np.clip(U0_elem + sgn * u_step, min_u, max_u))
+                            # 对某一个 site 局部搜索 +u/-u
+                            for sgn in (-1.0, +1.0):
 
-                                    # 🔥 关键：加“过程输出”，否则没改进就会长时间无日志，看起来像卡死
-                                    print(f"[{stg['name']} | B-Loop {loop:03d}] 🔧 try Uiso elem={elem}  {U0_elem:.6f} -> {U_try:.6f}",
-                                        flush=True)
+                                U_try = float(np.clip(U0 + sgn * u_step, min_u, max_u))
 
-                                    structs_try = dict(phase_structs)
-                                    touched = {}
-                                    for pkey, sidx, occ in refs:
-                                        if pkey not in touched:
-                                            touched[pkey] = structs_try[pkey].copy()
-                                        touched[pkey].sites[sidx].properties["_Uiso"] = U_try
-                                    for pkey, st_new in touched.items():
-                                        structs_try[pkey] = st_new
+                                st_try = st0.copy()
+                                st_try.sites[sidx].properties["_Uiso"] = U_try
 
-                                    score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(
-                                        structs_try, tpars, po_r,
-                                        freeze_scale=False,
-                                        stage_name=f"{stg['name']}-UisoElem-{elem}"
-                                    )
+                                structs_try = dict(phase_structs)
+                                structs_try[key] = st_try
 
-                                    if score_try + 1e-4 < best_local_uiso[0]:
-                                        best_local_uiso = (score_try, (structs_try, yfit_try, fr_try, sf_try, r_try))
+                                score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(
+                                    structs_try, tpars, po_r,
+                                    freeze_scale=False,
+                                    stage_name=f"{stg['name']}-Uiso"
+                                )
 
-                            # 应用本轮 Uiso 的最优更新
-                            if best_local_uiso[1] is not None and best_local_uiso[0] + 1e-6 < best_score:
-                                phase_structs, yfit, fr, sf, r_best = best_local_uiso[1]
-                                best_score = best_local_uiso[0]
-                                improved = True
-                                print(f"[{stg['name']} | B-Loop {loop:03d}] ✅ Uiso updated → Rwp={r_best:.2f}%", flush=True)
-            
+                                # 更新 Uiso 全局最优
+                                if score_try + 1e-4 < best_local_uiso[0]:
+                                    best_local_uiso = (score_try, (structs_try, yfit_try, fr_try, sf_try, r_try))
+
+                    # ←←← 注意：这里已经跳出 for key 和 for site 循环（左移一级缩进）
+                    # 在本 B-loop 内立即 apply 全局最佳 Uiso
+                    if best_local_uiso[1] is not None:
+                        structs_try, yfit, fr, sf, r_best = best_local_uiso[1]
+                        phase_structs = structs_try
+                        best_score = best_local_uiso[0]
+                        improved = True
+                        print(f"[{stg['name']} | B-Loop {loop:03d}]  Uiso optimized → Rwp={r_best:.2f}%")
+   
 
                     # --- Mixed occupancies（含 Vac）
-                    elif action_selected == 6:
-                        if mix_step >= min_mix_step:
-                            for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
+                    if mix_step >= min_mix_step:
+                        for key in list(phase_structs.keys()):
+                            st0 = phase_structs[key]
+                            site_indices = list_mixed_sites(st0)
+                            for sidx in site_indices:
+                                site = st0.sites[sidx]
+                                occ0 = get_site_occ_dict(site)
+                                occ0 = normalize_with_vac(occ0)
+                                elems = list(occ0.keys())  # 含“Vac”
+                                for e in elems:
+                                    cands = [("Vac", +mix_step), ("Vac", -mix_step)] if e=="Vac" else [(e, +mix_step), (e, -mix_step)]
+                                    best_local=(best_score, None); best_state=None; best_metrics=None
+                                    for (elem, stepval) in cands:
+                                        occ_try = dict(occ0)
+                                        occ_try[elem] = clamp01(occ_try.get(elem, 0.0) + stepval)
+                                        occ_try = normalize_with_vac({k:v for k,v in occ_try.items() if k!="Vac"})
+                                        st_try = sync_uiso(structure_with_mixed_occupancy(st0, sidx, occ_try))
+                                        structs_try = dict(phase_structs); structs_try[key]=st_try
+                                        # 混占阶段建议冻结 scale，避免与占据率耦合
+                                        score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(structs_try, tpars, po_r,
+                                                                                                    freeze_scale=False ,
+                                                                                                    stage_name=stg["name"])
+                                        if score_try + 1e-4 < best_local[0]:
+                                            best_local=(score_try, (elem, stepval, occ_try)); best_state=(structs_try,yfit_try,fr_try,sf_try,r_try); 
+                                    if best_state and best_local[0] + 1e-6 < best_score:
+                                        phase_structs, yfit, fr, sf, r_best = best_state
 
-                                # 与 xyz 一致：决定本阶段用哪种分组
-                                if stg["name"] == "粗调 (Stage 1)":
-                                    groups = fixed_groups_map[key]  # 冻结的 Wyckoff orbit
-                                elif stg["name"] == "精调 (Stage 3)":
-                                    groups = [[i] for i in range(len(st0.sites))]  # 你现在 Stage3 xyz 也是这样做的
-                                else:
-                                    groups = get_equivalent_groups(st0)  # 或者你也可以改成 fixed_groups_map[key] 更“硬”
-
-                                for gidx, group in enumerate(groups):
-                                    if not is_mixed_group(st0, group):
-                                        continue
-
-                                    rep = group[0]
-                                    occ0 = normalize_with_vac(get_site_occ_dict(st0.sites[rep]))
-                                    elems = list(occ0.keys())  # 含 Vac
-
-                                    for e in elems:
-                                        cands = [("Vac", +mix_step), ("Vac", -mix_step)] if e == "Vac" else [(e, +mix_step), (e, -mix_step)]
-                                        best_local = (best_score, None)
-                                        best_state = None
-
-                                        for (elem, stepval) in cands:
-                                            occ_try = dict(occ0)
-                                            occ_try[elem] = clamp01(occ_try.get(elem, 0.0) + stepval)
-                                            occ_try = normalize_with_vac({k: v for k, v in occ_try.items() if k != "Vac"})
-
-                                            st_try = sync_uiso(structure_with_mixed_occupancy_group(st0, group, occ_try))
-                                            structs_try = dict(phase_structs)
-                                            structs_try[key] = st_try
-
-                                            score_try, yfit_try, fr_try, sf_try, r_try, _ = inner_once(
-                                                structs_try, tpars, po_r,
-                                                freeze_scale=False,
-                                                stage_name=stg["name"]
-                                            )
-
-                                            if score_try + 1e-4 < best_local[0]:
-                                                best_local = (score_try, (elem, stepval, occ_try))
-                                                best_state = (structs_try, yfit_try, fr_try, sf_try, r_try)
-
-                                        if best_state and best_local[0] + 1e-6 < best_score:
-                                            phase_structs, yfit, fr, sf, r_best = best_state
-                                            best_score = best_local[0]
-                                            improved = True
-
-                                            elem, stepval, occ_final = best_local[1]
-                                            occ_str = ", ".join([f"{k}:{v:.3f}" for k, v in occ_final.items()])
-                                            print(f"[{stg['name']} | B-Loop {loop:03d}] ✅ mix {os.path.basename(key)} "
-                                                f"group#{gidx} sites={group} {elem} {stepval:+.3f} → Rwp={r_best:.2f}% "
+                                        best_score = best_local[0]; improved=True
+                                        elem, stepval, occ_final = best_local[1]
+                                        occ_str = ", ".join([f"{k}:{v:.3f}" for k,v in occ_final.items()])
+                                        print(f"[{stg['name']} | B-Loop {loop:03d}] ✅ mix {os.path.basename(key)} site#{sidx} "
+                                                f"{elem} {stepval:+.3f} → Rwp={r_best:.2f}% "
                                                 f"occ={{ {occ_str} }} | pos_step={pos_step:.4f} mix_step={mix_step:.3f}")
-                # =====================================================
-                # 【RL 植入】3. 计算 Reward 并让 Agent 学习
-                # =====================================================                    
-                # 奖励函数设计：
-                # 1. 进步奖：分数下降（Rwp减小）越多，奖励越高
-                # 2. 惩罚：如果没有进步，给一个负分
-                # 3. 步数惩罚：每走一步扣 0.01 分，鼓励 Agent 寻找最快路径
-                score_after = best_score
-                reward = (score_before - score_after) * 10.0 - 0.01
-                if not improved:
-                    reward = -0.5  # 选错了动作，没效果，重罚
-                    
-                # 更新历史和状态
-                rwp_trend_history.append(best_score)
-                next_state = get_refine_state()
-                    
-                # 喂给 Agent 学习
-                agent.learn(current_state, action_selected, reward, next_state)
-                    
-                # 限制历史记录长度，防止占用过多内存
-                if len(rwp_trend_history) > 20:
-                    rwp_trend_history.pop(0)
 
-                # =====================================================
-                # 【物理策略补全】4. 全局步长衰减
-                # =====================================================
-                if not improved:
-                    did_decay = False
-                    # 当某个动作没能带来提升时，我们按比例缩小所有物理参数的尝试范围
-                    if cell_step  >= min_cell_step_frac: cell_step  *= 0.8; did_decay = True
-                    if angle_step >= min_angle_step_deg: angle_step *= 0.8; did_decay = True
-                    if tch_step   >= min_tch_step_frac:  tch_step   *= 0.8; did_decay = True
-                    if po_step    >= min_po_step_frac:   po_step    *= 0.8; did_decay = True
-                    if pos_step   >= min_pos_step:       pos_step   *= 0.8; did_decay = True
-                    if mix_step   >= min_mix_step:       mix_step   *= 0.8; did_decay = True
-                    
-                    if did_decay:
-                        print(f"--- [Decay] 动作 {action_selected} 尝试失败，步长已缩小（目前 cell_step: {cell_step:.5f}） ---")
-                    else:
-                        print(f"[{stg['name']} | Loop {loop:03d}] ⛳ 所有物理步长已达极限。")
-                # =====================================================
+                    # 若本轮无提升，则衰减步长
+                    if not improved:
+                        did_decay=False
+                        prev = (pos_step, mix_step)
+                        if pos_step >= min_pos_step:  pos_step  *= 0.7; did_decay=True
+                        if mix_step >= min_mix_step:  mix_step  *= 0.7; did_decay=True
+                        if did_decay:
+                            print(f"[{stg['name']} | B-Loop {loop:03d}] ↘️ 步长衰减："
+                                    f"pos {prev[0]:.4f}->{pos_step:.4f} | mix {prev[1]:.3f}->{mix_step:.3f} "
+                                    f"| Rwp={r_best:.2f}% ")
+                        else:
+                            print(f"[{stg['name']} | B-Loop {loop:03d}] ⛳ 已到最小步长阈值，结束 B 段。")
+                            break
 
+                print(f"✅ 阶段完成：{stg['name']} | 当前 Rwp={r_best:.2f}% | score={best_score:.2f}")
+
+                # === 【新增】粗调 (Stage 1) 结果完整保存 ===
+                if stg["name"] == "粗调 (Stage 1)":
+                    out_prefix = "Stage1_Refined"
+                    os.makedirs("stage1_output", exist_ok=True)
+
+                    # 图像
+                    plt.figure(figsize=(10,6))
+                    plt.plot(x_grid, y_obs, lw=1.0, label="Experiment")
+                    plt.plot(x_grid, yfit, lw=1.0, label="Stage1 Fit")
+                    plt.xlabel("2θ (deg)")
+                    plt.ylabel("Normalized Intensity")
+                    plt.title("Stage 1  Refinement Result")
+
+                    text_lines = []
+                    text_lines.append("Composition:")
+                    for f, w in zip(phase_structs.keys(), fr):
+                        text_lines.append(f"  {os.path.basename(f)}: {w*100:.2f}%")
+                    text_lines.append("")
+                    text_lines.append(f"Rwp = {r_best:.2f}%")
+                    text_str = "\n".join(text_lines)
+
+                    plt.text(1.02, 0.98, text_str, transform=plt.gca().transAxes,
+                             fontsize=10, va="top", ha="left",
+                             bbox=dict(facecolor="white", alpha=0.8, edgecolor="gray"))
+                    plt.legend()
+                    plt.tight_layout(rect=[0, 0, 0.8, 1])
+                    plt.savefig(f"stage1_output/{out_prefix}.png", dpi=300)
+                    plt.close()
+                    print(f"🖼️ 已保存粗调阶段图像：stage1_output/{out_prefix}.png")
+
+                    # xy 拟合曲线
+                    xy_out = np.column_stack([x_grid, y_obs, yfit])
+                    np.savetxt(f"stage1_output/{out_prefix}.xy", xy_out, fmt="%.6f",
+                               header="2Theta  Intensity_Obs  Intensity_Fit")
+                    print(f"💾 已保存粗调阶段谱线：stage1_output/{out_prefix}.xy")
+
+                    # 文本报告
+                    with open(f"stage1_output/{out_prefix}.txt", "w", encoding="utf-8") as fw:
+                        fw.write("=== Stage 1 Refinement Result ===\n")
+                        fw.write(f"Rwp : {r_best:.3f}%\n")
+                        fw.write("TCH params: " + ", ".join([f"{k}={v:.6g}" for k,v in tpars.items()]) + "\n")
+                        fw.write("\nPhases:\n")
+                        for f, w, s in zip(phase_structs.keys(), fr, sf):
+                            fw.write(f"  {os.path.basename(f):<28s} frac={w*100:6.2f}% | scale={float(s):.4f}\n")
+                    print(f"🧾 已保存粗调阶段文本报告：stage1_output/{out_prefix}.txt")
+
+                    # 导出 CIF
+                    cif_dir = "stage1_output/cifs"
+                    os.makedirs(cif_dir, exist_ok=True)
+                    for fpath, struct in phase_structs.items():
+                        base = os.path.basename(fpath)
+                        name, _ = os.path.splitext(base)
+                        out_path = os.path.join(cif_dir, f"{name}_Stage1.cif")
+                        struct.to(filename=out_path)
+                    print(f"💾 已导出粗调阶段 CIF 文件至 {cif_dir}/")
+
+                # === 【新增】微调 (Stage 2) 结果完整保存 ===
+                if stg["name"] == "微调 (Stage 2)":
+                    out_prefix = "Stage2_Refined"
+                    os.makedirs("stage2_output", exist_ok=True)
+
+                    # ---------- 图像 ----------
+                    plt.figure(figsize=(10,6))
+                    plt.plot(x_grid, y_obs, lw=1.0, label="Experiment")
+                    plt.plot(x_grid, yfit, lw=1.0, label="Stage2 Fit")
+                    plt.xlabel("2θ (deg)")
+                    plt.ylabel("Normalized Intensity")
+                    plt.title("Stage 2  Refinement Result")
+
+                    text_lines = []
+                    text_lines.append("Composition:")
+                    for f, w in zip(phase_structs.keys(), fr):
+                        text_lines.append(f"  {os.path.basename(f)}: {w*100:.2f}%")
+                    text_lines.append("")
+                    text_lines.append(f"Rwp = {r_best:.2f}%")
+                    text_str = "\n".join(text_lines)
+
+                    plt.text(1.02, 0.98, text_str, transform=plt.gca().transAxes,
+                            fontsize=10, va="top", ha="left",
+                            bbox=dict(facecolor="white", alpha=0.8, edgecolor="gray"))
+                    plt.legend()
+                    plt.tight_layout(rect=[0, 0, 0.8, 1])
+                    plt.savefig(f"stage2_output/{out_prefix}.png", dpi=300)
+                    plt.close()
+                    print(f"🖼️ 已保存微调阶段图像：stage2_output/{out_prefix}.png")
+
+                    # ---------- XY 拟合曲线 ----------
+                    xy_out = np.column_stack([x_grid, y_obs, yfit])
+                    np.savetxt(f"stage2_output/{out_prefix}.xy", xy_out, fmt="%.6f",
+                            header="2Theta  Intensity_Obs  Intensity_Fit")
+                    print(f"💾 已保存微调阶段谱线：stage2_output/{out_prefix}.xy")
+
+                    # ---------- 文本报告 ----------
+                    with open(f"stage2_output/{out_prefix}.txt", "w", encoding="utf-8") as fw:
+                        fw.write("=== Stage 2 Refinement Result ===\n")
+                        fw.write(f"Rwp : {r_best:.3f}%\n")
+                        fw.write("TCH params: " + ", ".join([f"{k}={v:.6g}" for k,v in tpars.items()]) + "\n")
+                        fw.write("\nPhases:\n")
+                        for f, w, s in zip(phase_structs.keys(), fr, sf):
+                            fw.write(f"  {os.path.basename(f):<28s} frac={w*100:6.2f}% | scale={float(s):.4f}\n")
+                    print(f"🧾 已保存微调阶段文本报告：stage2_output/{out_prefix}.txt")
+
+                    # ---------- 导出 CIF ----------
+                    cif_dir = "stage2_output/cifs"
+                    os.makedirs(cif_dir, exist_ok=True)
+                    for fpath, struct in phase_structs.items():
+                        base = os.path.basename(fpath)
+                        name, _ = os.path.splitext(base)
+                        out_path = os.path.join(cif_dir, f"{name}_Stage2.cif")
+                        struct.to(filename=out_path)
+                    print(f"💾 已导出微调阶段 CIF 文件至 {cif_dir}/")
+
+
+
+                # ✅ 阶段保温存档
+                stage_state = {
+                    "phase_structs": phase_structs,
+                    "tpars": tpars,
+                    "po_r": po_r,
+                    "yfit": yfit,
+                    "fr": fr,
+                    "sf": sf
+                }
+                print(f"🧊 阶段保温：{stg['name']} 结果已保存，将传入下一阶段。")
+
+    
             # ==========================================================
             # 生成 refine 日志曲线
             # ==========================================================
@@ -1470,16 +1535,16 @@ def main(
     max_candidates=6,
     max_phases_in_mix=4,
     # 三阶段循环次数
-    stage_loops=(300, 100, 150),
+    stage_loops=(60, 100, 150),
     single_phase=False,
     # atoms refine params
     init_pos_step=0.005, min_pos_step=0.002,
     # mixed occupancy
-    init_mix_step=0.05,  min_mix_step=0.01,
+    init_mix_step=0.08,  min_mix_step=0.004,
     # angle/cell/TCH
     init_angle_step_deg=0.3, min_angle_step_deg=0.05,
     init_cell_step_frac=0.0025, min_cell_step_frac=0.0002,
-    init_tch_step_frac=0.15,   min_tch_step_frac=0.05,
+    init_tch_step_frac=0.20,   min_tch_step_frac=0.05,
     # Preferred Orientation
     enable_po=True,                 #  择优取向
     init_po_step_frac=0.25, min_po_step_frac=0.05,

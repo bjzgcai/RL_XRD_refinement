@@ -9,6 +9,14 @@ This project provides automated refinement tools for XRD patterns. The current r
 
 Both scripts read an experimental `.xy` pattern, a main-phase CIF file, and an optional impurity-phase CIF folder. They perform candidate impurity screening, phase-combination search, peak-shape fitting, unit-cell refinement, atomic-position refinement, occupancy refinement, preferred-orientation refinement, and final result export.
 
+## Project Status
+
+- License: MIT. See `LICENSE`.
+- Current release line: `v1`.
+- Maintenance status: maintained as a research/engineering tool. Issues and pull requests for reproducibility, examples, tests, and bug fixes are welcome.
+- Scope: this repository contains executable scripts, documentation, examples, and XRD/CIF data used for demonstration and validation.
+
+
 ## Installation
 
 It is recommended to use an isolated Python environment. Install dependencies with:
@@ -16,6 +24,8 @@ It is recommended to use an isolated Python environment. Install dependencies wi
 ```bash
 pip install -r requirements.txt
 ```
+
+For a reproducible environment close to the one used during repository cleanup, see `requirements-lock.txt`. The locked PyTorch line may be CUDA-build specific; choose a CPU/CUDA PyTorch build that matches your machine if needed.
 
 Main dependencies:
 
@@ -156,6 +166,35 @@ python yfs_XRD.py --xy sample_bg_removed.xy --main main.cif --imp impure_phase
 ```
 
 If the result is still unsatisfactory after background subtraction, check whether the main-phase CIF is correct, whether the candidate impurity phases are complete, whether the wavelength is correct, and whether there is strong preferred orientation or systematic peak shift.
+
+## Testing
+
+Run the lightweight static smoke tests before publishing changes:
+
+```bash
+python -m unittest discover -s tests
+python -m py_compile yfs_XRD.py QL_yfs_XRD.py parallel_batch_refine.py
+```
+
+The current tests intentionally avoid requiring large XRD datasets or GPU hardware. Add numerical regression tests when stable reference outputs are available.
+
+## Security And Batch Execution
+
+- The scripts do not make external network requests during refinement.
+- `parallel_batch_refine.py` launches refinement with an argument list and the default `shell=False`; do not replace this with shell command strings.
+- Treat CIF, JSON, and XY files from untrusted sources as data inputs. Run large or unknown datasets in an isolated environment and review output logs.
+- Report suspected vulnerabilities or accidentally committed secrets privately if possible; see `SECURITY.md`.
+
+## Open Source Compliance
+
+- Project license: MIT, declared in `LICENSE` and via SPDX headers in Python source files.
+- Third-party dependency license summary: see `THIRD_PARTY_NOTICES.md`.
+- Reproducibility reference: `requirements-lock.txt`.
+- Audit response and remaining work: `OPEN_SOURCE_REVIEW_RESPONSE.md`.
+
+## License
+
+This project is released under the MIT License. See `LICENSE` for the full text.
 
 ## Notes
 

@@ -1,4 +1,4 @@
-
+# SPDX-License-Identifier: MIT
 import os, itertools, re, hashlib
 import numpy as np
 import torch

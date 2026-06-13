@@ -1,0 +1,8 @@
+# Locked reference environment recorded on 2026-06-13.
+# Install `requirements.txt` for broad compatibility; use this file when exact reproduction is needed.
+# The torch build includes a CUDA suffix and may need a matching PyTorch package index.
+numpy==1.26.4
+scipy==1.15.3
+torch==2.11.0+cu128
+matplotlib==3.10.8
+pymatgen==2025.10.7
