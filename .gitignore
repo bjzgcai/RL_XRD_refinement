@@ -30,3 +30,8 @@ yfsf_refined_cifs/
 stage1_output/
 stage2_output/
 stage3_output/
+
+# Local-only baseline scripts; keep them out of public uploads.
+QL_yfs_XRD_base.py
+src/yfs_xrd_refinement/qlearning_base.py
+QL-yfsf_base.py

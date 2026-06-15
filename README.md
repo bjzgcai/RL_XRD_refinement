@@ -2,10 +2,13 @@
 
 Version: v1
 
-This project provides automated refinement tools for XRD patterns. The current repository contains two main entry scripts:
+This project provides automated refinement tools for XRD patterns. The code is organized as an installable Python package under `src/yfs_xrd_refinement/`, while the original root-level scripts remain as compatibility wrappers.
 
-- `yfs_XRD.py`: standard multi-stage automated refinement.
-- `QL_yfs_XRD.py`: a Q-Learning enhanced version based on the standard workflow, intended for more adaptive parameter search.
+Main workflows:
+
+- `yfs_xrd_refinement.standard`: standard multi-stage automated refinement.
+- `yfs_xrd_refinement.qlearning`: a Q-Learning enhanced version based on the standard workflow, intended for more adaptive parameter search.
+- `yfs_xrd_refinement.batch`: batch runner for opXRD-style pattern folders.
 
 Both scripts read an experimental `.xy` pattern, a main-phase CIF file, and an optional impurity-phase CIF folder. They perform candidate impurity screening, phase-combination search, peak-shape fitting, unit-cell refinement, atomic-position refinement, occupancy refinement, preferred-orientation refinement, and final result export.
 
@@ -16,6 +19,28 @@ Both scripts read an experimental `.xy` pattern, a main-phase CIF file, and an o
 - Maintenance status: maintained as a research/engineering tool. Issues and pull requests for reproducibility, examples, tests, and bug fixes are welcome.
 - Scope: this repository contains executable scripts, documentation, examples, and XRD/CIF data used for demonstration and validation.
 
+
+
+## Repository Layout
+
+```text
+yfs_XRD_refinement/
+  src/yfs_xrd_refinement/
+    standard.py          # standard multi-stage refinement implementation
+    qlearning.py         # Q-Learning enhanced implementation
+    batch.py             # batch execution helper
+    cli.py               # console entry points
+  yfs_XRD.py             # compatibility wrapper for standard.py
+  QL_yfs_XRD.py          # compatibility wrapper for qlearning.py
+  parallel_batch_refine.py
+  tests/
+  pyproject.toml
+```
+
+```bash
+# Optional editable install for console scripts
+pip install -e .
+```
 
 ## Installation
 
@@ -59,16 +84,30 @@ File descriptions:
 
 ## Basic Usage
 
-Run the standard refinement script from a sample folder:
+Run the standard refinement from a sample folder. The old script entry still works:
 
 ```bash
 python yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
+```
+
+The package entry is equivalent:
+
+```bash
+PYTHONPATH=src python -m yfs_xrd_refinement standard --xy sample.xy --main main.cif --imp impure_phase
+```
+
+After `pip install -e .`, you can also use the console script:
+
+```bash
+yfs-xrd-refine --xy sample.xy --main main.cif --imp impure_phase
 ```
 
 Run the Q-Learning version:
 
 ```bash
 python QL_yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
+# or, after editable install:
+yfs-xrd-ql-refine --xy sample.xy --main main.cif --imp impure_phase
 ```
 
 For single-phase refinement, the impurity folder can be omitted:
@@ -173,7 +212,7 @@ Run the lightweight static smoke tests before publishing changes:
 
 ```bash
 python -m unittest discover -s tests
-python -m py_compile yfs_XRD.py QL_yfs_XRD.py parallel_batch_refine.py
+python -m py_compile yfs_XRD.py QL_yfs_XRD.py parallel_batch_refine.py src/yfs_xrd_refinement/*.py
 ```
 
 The current tests intentionally avoid requiring large XRD datasets or GPU hardware. Add numerical regression tests when stable reference outputs are available.
