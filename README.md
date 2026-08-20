@@ -110,6 +110,14 @@ python QL_yfs_XRD.py --xy sample.xy --main main.cif --imp impure_phase
 yfs-xrd-ql-refine --xy sample.xy --main main.cif --imp impure_phase
 ```
 
+The Q-learning run is one continuous episode across Stage 1, Stage 2, and
+Stage 3. The agent and Rwp state history are created once and every action
+produces exactly one Q update. At Stage 1/2 boundaries, the update is resolved
+after the next stage initializes so its bootstrap state and action mask are
+correct; only the final Stage 3 transition is terminal. Action 4 computes the
+initial Wyckoff grouping once and reuses
+that fixed grouping in all three stages.
+
 For single-phase refinement, the impurity folder can be omitted:
 
 ```bash
@@ -135,6 +143,7 @@ Both scripts support:
 
 ```bash
 --wl              X-ray wavelength in Angstrom; default is 1.5406
+--stage-loops     Positive loop counts for Stage 1, 2, and 3; default is 60 100 150
 ```
 
 Example:
@@ -159,7 +168,8 @@ yfsf_Refined.png          Final refinement plot
 yfsf_Refined.xy           Experimental and fitted pattern data
 yfsf_Refined.txt          Final report with Rwp, phase fractions, scale factors, TCH parameters, etc.
 yfsf_refined_cifs/        Refined CIF files
-refine_log.csv            Refinement process log
+refine_log.csv            Attempt-level log with separate Rwp and score columns
+rl_trajectory.csv         One row per Q-learning decision/update across all stages
 Rwp_curve.png             Rwp curve
 phase_fraction_curve.png  Phase-fraction curve
 scale_curve.png           Scale-factor curve
@@ -216,6 +226,20 @@ python -m py_compile yfs_XRD.py QL_yfs_XRD.py parallel_batch_refine.py src/yfs_x
 ```
 
 The current tests intentionally avoid requiring large XRD datasets or GPU hardware. Add numerical regression tests when stable reference outputs are available.
+
+## Batch Refinement
+
+The batch runner resolves `database_opXRD` from the repository root and defaults
+to one outer task per selected GPU. Failed or interrupted logs are rerun; only
+a zero return code plus final report and fitted-curve files are skipped.
+
+```bash
+python parallel_batch_refine.py --data-root database_opXRD --gpus 0,1,2,3
+```
+
+Use `--max-workers` only when deliberately allowing more than one simultaneous
+task per GPU. Add `--imp /path/to/impure_phase` when a shared candidate-phase
+directory is available.
 
 ## Security And Batch Execution
 

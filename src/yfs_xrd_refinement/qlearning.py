@@ -22,33 +22,54 @@ from collections import defaultdict
 # 【新增：强化学习决策模块】
 # ============================================
 class QLearningRefineAgent:
-    def __init__(self, actions: list, learning_rate=0.1, reward_decay=0.9, e_greedy=0.2):
-        self.actions = actions  # 动作索引列表
+    """Tabular Q-learning agent with masked epsilon-greedy decisions."""
+
+    def __init__(self, actions: list, learning_rate=0.1, reward_decay=0.9,
+                 e_greedy=0.2, rng=None):
+        if not actions or len(set(actions)) != len(actions):
+            raise ValueError("actions must be a non-empty list of unique labels")
+        self.actions = tuple(actions)
+        self.action_to_index = {action: index for index, action in enumerate(self.actions)}
         self.lr = learning_rate
         self.gamma = reward_decay
         self.epsilon = e_greedy
-        # Q表：使用字典存储，键为状态，值为每个动作的得分
+        self.rng = rng if rng is not None else np.random.default_rng()
         self.q_table = defaultdict(lambda: np.zeros(len(actions)))
 
-    def choose_action(self, state):
-        # 状态发现与动作选择 (epsilon-greedy)
-        if np.random.uniform() < self.epsilon:
-            # 探索：随机选一个动作
-            action = np.random.choice(self.actions)
-        else:
-            # 开发：选择当前状态下 Q 值最高的动作
-            state_action = self.q_table[state]
-            action = np.argmax(state_action)
-        return action
+    def _valid_actions(self, valid_actions=None):
+        valid = self.actions if valid_actions is None else tuple(valid_actions)
+        unknown = [action for action in valid if action not in self.action_to_index]
+        if unknown:
+            raise ValueError(f"unknown action labels: {unknown}")
+        if not valid:
+            raise ValueError("valid_actions must contain at least one action")
+        return valid
 
-    def learn(self, s, a, r, s_):
-        # 标准 Q-Learning 更新公式
-        q_predict = self.q_table[s][a]
-        if s_ != 'terminal':
-            q_target = r + self.gamma * np.max(self.q_table[s_])
+    def choose_action(self, state, valid_actions=None):
+        valid = self._valid_actions(valid_actions)
+        if self.rng.random() < self.epsilon:
+            action = self.rng.choice(valid)
+        else:
+            state_action = self.q_table[state]
+            valid_indices = np.asarray([self.action_to_index[a] for a in valid], dtype=int)
+            valid_q = state_action[valid_indices]
+            max_q = np.max(valid_q)
+            tied = np.flatnonzero(np.isclose(valid_q, max_q, rtol=1e-12, atol=1e-12))
+            action = valid[int(self.rng.choice(tied))]
+        return int(action) if isinstance(action, np.integer) else action
+
+    def learn(self, s, a, r, s_, next_valid_actions=None):
+        if a not in self.action_to_index:
+            raise ValueError(f"unknown action label: {a}")
+        action_index = self.action_to_index[a]
+        q_predict = self.q_table[s][action_index]
+        if s_ != "terminal":
+            valid = self._valid_actions(next_valid_actions)
+            valid_indices = [self.action_to_index[action] for action in valid]
+            q_target = r + self.gamma * np.max(self.q_table[s_][valid_indices])
         else:
             q_target = r
-        self.q_table[s][a] += self.lr * (q_target - q_predict)
+        self.q_table[s][action_index] += self.lr * (q_target - q_predict)
 
 
 ##  补充读取uiso
@@ -80,12 +101,15 @@ def sync_uiso(struct):
 # 全程记录日志（Rwp / frac / scale 曲线）
 # ===========================
 RWP_LOG = []
+SCORE_LOG = []
 FRAC_LOG = []
 SCALE_LOG = []
 STEP_LOG = []
+RL_TRAJECTORY_LOG = []
 
-def push_log(stage_name, rwp, fr, sf):
+def push_log(stage_name, rwp, fr, sf, score=None):
     RWP_LOG.append(float(rwp))
+    SCORE_LOG.append(float(rwp if score is None else score))
     FRAC_LOG.append([float(x) for x in fr])
     SCALE_LOG.append([float(x) for x in sf])
     STEP_LOG.append(stage_name)
@@ -95,6 +119,14 @@ _ALT_EARLY_STOP_PATIENCE = 50   # 连续多少次无提升提前停止
 _ALT_SCORE_W_DATA = 1.0         # Rwp 权重
 _ALT_SCORE_W_STOICH = 0.1       # 化学计量约束权重
 # =========================================
+
+def compose_refinement_loss(data_loss, stoich_term, mode, lambda_stoich):
+    """Use exactly the same objective in Adam, LBFGS, and evaluation."""
+    if stoich_term is None or lambda_stoich <= 0.0 or mode == "fit":
+        return data_loss
+    if mode == "stoich":
+        return 0.01 * data_loss + lambda_stoich * stoich_term
+    return data_loss + lambda_stoich * stoich_term
 
 # -----------------------------
 # IO
@@ -281,6 +313,10 @@ def torch_refine(exp_y: np.ndarray, profiles: List[np.ndarray], device: torch.de
                  lambda_stoich: float = 0.0,
                  global_logits: Optional[torch.nn.Parameter] = None
                  ):
+    if mode not in {"fit", "stoich", "combined"}:
+        raise ValueError(f"unsupported refinement mode: {mode}")
+    if lambda_stoich < 0.0:
+        raise ValueError("lambda_stoich must be non-negative")
     # 这里用等间距索引作为 x，仅用于 zero-shift 插值
     model = TorchRietveld(np.arange(len(exp_y)), exp_y, profiles, bg_degree, device, freeze_scale).to(device)
 
@@ -313,22 +349,12 @@ def torch_refine(exp_y: np.ndarray, profiles: List[np.ndarray], device: torch.de
         data_loss = torch.mean(wgt * mse(y_pred, exp_y_t))
 
         # 化学计量惩罚项（对 logits 可微）
-
+        stoich_term = None
         if lambda_stoich > 0.0 and stoich_penalty_per_phase is not None:
             pen_vec = torch.tensor(stoich_penalty_per_phase, dtype=torch.float32, device=device)
             alpha_vec = torch.tensor(stoich_phase_weights or [1.0]*len(pen_vec), dtype=torch.float32, device=device)
             stoich_term = torch.sum(frac * s * alpha_vec * pen_vec)
-
-            if mode == "fit":  # StepA
-                loss = data_loss
-            elif mode == "stoich":  # StepB
-                # StepB 主要关注化学计量合理性，不看Rwp
-                loss = lambda_stoich * stoich_term + 0.01 * data_loss
-            else:
-                # 精修B：兼顾两者
-                loss = data_loss + lambda_stoich * stoich_term
-        else:
-            loss = data_loss
+        loss = compose_refinement_loss(data_loss, stoich_term, mode, lambda_stoich)
 
 
         # === 自定义监控指标 ===
@@ -338,14 +364,8 @@ def torch_refine(exp_y: np.ndarray, profiles: List[np.ndarray], device: torch.de
             exp_np = exp_y_t.detach().cpu().numpy()
             cur_metric = calc_r_factors(exp_np, y_np)  # 单位：%
         else:
-            # Step B：关注化学计量偏差
-            if lambda_stoich > 0.0 and stoich_penalty_per_phase is not None:
-                pen_vec = torch.tensor(stoich_penalty_per_phase, dtype=torch.float32, device=device)
-                alpha_vec = torch.tensor(stoich_phase_weights or [1.0]*len(pen_vec), dtype=torch.float32, device=device)
-                stoich_term_eval = torch.sum(frac * s * alpha_vec * pen_vec).item()
-                cur_metric = float(stoich_term_eval)
-            else:
-                cur_metric = float(loss.item())
+            # Step B uses the exact optimization objective as its snapshot metric.
+            cur_metric = float(loss.item())
 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)  # 梯度裁剪
@@ -381,13 +401,12 @@ def torch_refine(exp_y: np.ndarray, profiles: List[np.ndarray], device: torch.de
             data_loss2 = torch.mean(wgt * mse(y2, exp_y_t))
 
             # 化学计量惩罚项（对 logits 可微）
+            stoich_term2 = None
             if lambda_stoich > 0.0 and stoich_penalty_per_phase is not None:
                 pen_vec = torch.tensor(stoich_penalty_per_phase, dtype=torch.float32, device=device)
                 alpha_vec = torch.tensor(stoich_phase_weights or [1.0]*len(pen_vec), dtype=torch.float32, device=device)
                 stoich_term2 = torch.sum(frac2 * s2 * alpha_vec * pen_vec)
-                loss2 = data_loss2 + (lambda_stoich) * stoich_term2
-            else:
-                loss2 = data_loss2
+            loss2 = compose_refinement_loss(data_loss2, stoich_term2, mode, lambda_stoich)
 
             loss2.backward();
             return loss2
@@ -401,13 +420,14 @@ def torch_refine(exp_y: np.ndarray, profiles: List[np.ndarray], device: torch.de
             data_loss2_eval = torch.mean(wgt2 * (y2 - exp_y_t) ** 2)
 
             # ---- 化学计量约束项（若启用）
+            stoich_term2_eval = None
             if lambda_stoich > 0.0 and stoich_penalty_per_phase is not None:
                 pen_vec = torch.tensor(stoich_penalty_per_phase, dtype=torch.float32, device=device)
                 alpha_vec = torch.tensor(stoich_phase_weights or [1.0]*len(pen_vec), dtype=torch.float32, device=device)
                 stoich_term2_eval = torch.sum(w2 * s2 * alpha_vec * pen_vec)
-                total_loss2 = (data_loss2_eval + lambda_stoich * stoich_term2_eval).item()
-            else:
-                total_loss2 = data_loss2_eval.item()
+            total_loss2 = compose_refinement_loss(
+                data_loss2_eval, stoich_term2_eval, mode, lambda_stoich
+            ).item()
 
             # ---- 计算与训练阶段一致的“监控指标”
             if mode == "fit":
@@ -416,13 +436,8 @@ def torch_refine(exp_y: np.ndarray, profiles: List[np.ndarray], device: torch.de
                 exp_np = exp_y_t.detach().cpu().numpy()
                 metric2 = calc_r_factors(exp_np, y2_np)  # %
             else:
-                # 与 Step B 一致：stoich_term 作为指标（若无则退化为 data_loss）
-                if lambda_stoich > 0.0 and stoich_penalty_per_phase is not None:
-                    pen_vec = torch.tensor(stoich_penalty_per_phase, dtype=torch.float32, device=device)
-                    alpha_vec = torch.tensor(stoich_phase_weights or [1.0]*len(pen_vec), dtype=torch.float32, device=device)
-                    metric2 = float(torch.sum(w2 * s2 * alpha_vec * pen_vec).item())
-                else:
-                    metric2 = float(data_loss2_eval.item())
+                # 与 Step B 一致：使用与 Adam/LBFGS 完全相同的目标函数。
+                metric2 = float(total_loss2)
 
             # ---- 判断是否改进（保持与训练阶段一致的“best['loss']”语义）
             if metric2 + 1e-12 < best["loss"] - min_delta:
@@ -759,11 +774,35 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
 
 
     import numpy as np
-    # --- 强制主相文件名标准化，防止路径不匹配（非常关键）
+    if len(stage_loops) != 3 or any(int(count) <= 0 for count in stage_loops):
+        raise ValueError("stage_loops must contain three positive integers")
+    stage_loops = tuple(int(count) for count in stage_loops)
+    if num_workers is None or int(num_workers) < 1:
+        raise ValueError("num_workers must be at least 1")
+    num_workers = int(num_workers)
+
+    # A single canonical key is used for structures, PO settings, and stoichiometry.
+    original_items = list(phase_structs.items())
+    canonical_keys = [os.path.basename(key) for key, _ in original_items]
+    if len(set(canonical_keys)) != len(canonical_keys):
+        raise ValueError("phase CIF basenames must be unique")
+    phase_structs = {
+        os.path.basename(key): structure for key, structure in original_items
+    }
     if stoich_phase_key is not None:
         stoich_phase_key = os.path.basename(stoich_phase_key)
-    phase_structs = {os.path.basename(k): v for k, v in phase_structs.items()}
-    # === 冻结 Wyckoff 分组：始终使用初始 CIF 的对称性 ===
+        if stoich_phase_key not in phase_structs:
+            raise ValueError(f"stoichiometry phase {stoich_phase_key!r} is not in phase_structs")
+    if lambda_stoich < 0.0:
+        raise ValueError("lambda_stoich must be non-negative")
+    if po_axes is not None:
+        po_axes = {os.path.basename(key): value for key, value in po_axes.items()}
+    if po_r_init is not None:
+        po_r_init = {os.path.basename(key): value for key, value in po_r_init.items()}
+
+    for log in (RWP_LOG, SCORE_LOG, FRAC_LOG, SCALE_LOG, STEP_LOG, RL_TRAJECTORY_LOG):
+        log.clear()
+    # === 冻结 Wyckoff 分组：只按初始 CIF 计算一次，三个 Stage 始终复用 ===
     fixed_groups_map: Dict[str, List[List[int]]] = {}
     for key, st in phase_structs.items():
         sga0 = SpacegroupAnalyzer(st, symprec=5e-4, angle_tolerance=3.0)
@@ -828,16 +867,26 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                 round(float(tpars["X"]), 8),
                 round(float(tpars["Y"]), 8))
 
+    def _structure_fingerprint(st: Structure):
+        lattice = tuple(np.round(np.asarray(st.lattice.matrix, dtype=float).ravel(), 10))
+        sites = []
+        for site in st.sites:
+            species = tuple(sorted((str(sp), round(float(occ), 10))
+                                   for sp, occ in site.species.items()))
+            frac = tuple(np.round(np.asarray(site.frac_coords, dtype=float), 10))
+            uiso = round(float(site.properties.get("_Uiso", 0.01)), 10)
+            sites.append((species, frac, uiso))
+        return lattice, tuple(sites)
+
     def _phase_profile_key(phase_key: str, st: Structure, tpars: dict, po_r_dict: dict):
-        # ✅ 快速：用 id(st) 当结构指纹（你代码里结构基本都是“新建对象”而不是原地改，所以安全且很快）
-        # 如果你将来有“原地修改结构”的写法，再换成 hash(st.as_dict()) 那类慢但稳的方案。
-        st_id = id(st)
+        # Value-based fingerprint avoids stale hits when Python reuses object ids.
+        structure_key = _structure_fingerprint(st)
 
         # 影响 profile 的参数（必须进 key）
         tkey = _tpars_key(tpars)
         pr = float(po_r_dict.get(phase_key, 1.0))
         ax = tuple(po_axes.get(phase_key, (0, 0, 1)))
-        return (phase_key, st_id, tkey, round(float(pr), 8), ax,
+        return (phase_key, structure_key, tkey, round(float(pr), 8), ax,
                 round(float(broad_base), 8), bool(enable_po), round(float(wavelength), 8),
                 # x_grid 一般不变，但把边界/长度带上，防止你换数据时“误复用”
                 int(len(x_grid)), round(float(x_grid[0]), 8), round(float(x_grid[-1]), 8))
@@ -926,11 +975,34 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     return "Normal"
 
             # =====================================================
+            pending_transition = None
+
+            def learn_transition(transition, next_state, next_valid_actions):
+                """Apply one Q update and append one auditable trajectory row."""
+                action = transition["action"]
+                q_index = agent.action_to_index[action]
+                q_before = float(agent.q_table[transition["state"]][q_index])
+                agent.learn(
+                    transition["state"],
+                    action,
+                    transition["reward"],
+                    next_state,
+                    next_valid_actions=next_valid_actions,
+                )
+                completed = dict(transition)
+                completed.update({
+                    "next_state": next_state,
+                    "q_before": q_before,
+                    "q_after": float(agent.q_table[transition["state"]][q_index]),
+                })
+                RL_TRAJECTORY_LOG.append(completed)
 
             def inner_once(structs_dict, tpars, po_r_dict, freeze_scale=False, stage_name="Stage", lambda_stoich=0.0):
 
-                # ✅ 修改2：Uiso 试探优先，用更小的 epochs
-                if "粗调" in stage_name:
+                # Uiso trials use the smaller budget from the original implementation.
+                if "Uiso" in stage_name:
+                    e, l2 = 100, 0.20
+                elif "粗调" in stage_name:
                     e, l2 = 250, 0.30
                 elif "微调" in stage_name:
                     e, l2 = 200, 0.30
@@ -985,23 +1057,20 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     print(f"\n📘 [StoichPenalty] λ_stoich = {lambda_stoich:.3f}")
                     print(f"👉 已识别主相为：{stoich_phase_key}")
                     print("🧩 各相的化学计量约束权重：")
-                    for k in structs_dict.keys():
+                    for k, alpha in zip(structs_dict.keys(), alpha_list):
                         is_main = (stoich_phase_key and os.path.basename(k) == os.path.basename(stoich_phase_key))
-                        w = 1.0 if is_main else 0.5
                         tag = "主相" if is_main else "杂相"
-                        print(f"   ├─ {os.path.basename(k):<25s} | 类型: {tag:<3s} | λ_phase = {w*lambda_stoich:.3f}")
+                        print(f"   ├─ {os.path.basename(k):<25s} | 类型: {tag:<3s} | λ_phase = {alpha*lambda_stoich:.3f}")
                     print("-------------------------------------------------------")
                     inner_once._stoich_printed = True  # 防止重复打印
 
-                RWP_LOG.append(float(score))
-                FRAC_LOG.append([float(x) for x in fr])
-                SCALE_LOG.append([float(x) for x in sf])
-                STEP_LOG.append(stage_name)
+                push_log(stage_name, Rwp, fr, sf, score=score)
                 return score, yfit, fr, sf, Rwp, profiles
 
             # init
             tpars = dict(tch_params)
             best_score, yfit, fr, sf, r_best,  _ = inner_once(phase_structs, tpars, po_r, freeze_scale=False, stage_name="初始化")
+            rwp_trend_history.append(r_best)
             print(f"\n🔁 外层精修启动：Rwp={r_best:.2f}% |  score={best_score:.2f}")
 
             ANG_MIN, ANG_MAX = 20.0, 160.0                # 限制角度范围
@@ -1022,7 +1091,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     "loops": stage_loops[2], }
             ]
 
-            for stg in stage_settings:
+            for stg_index, stg in enumerate(stage_settings):
                 print(f"\n🚀 进入阶段：{stg['name']} | loops={stg['loops']} ")
 
 
@@ -1031,33 +1100,42 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                 # =====================================================
                 print(f"\n▶️ {stg['name']} StepA：结构拟合阶段（λ_stoich=0.0）")
                 reset_profile_cache(f"{stg['name']}-before-StepA")
-                best_score, yfit, fr, sf, r_best, _ = inner_once(
+                stepa_score, stepa_yfit, stepa_fr, stepa_sf, stepa_rwp, _ = inner_once(
                     phase_structs, tpars, po_r,
                     freeze_scale=False,
                     stage_name=f"{stg['name']}-StepA",
                     lambda_stoich=0.0
                 )
-                rwp_trend_history = [r_best]
-                print(f"✅ StepA 完成：Rwp={r_best:.2f}% | score={best_score:.2f}")
+                if stepa_score <= best_score + 1e-8:
+                    best_score, yfit, fr, sf, r_best = (
+                        stepa_score, stepa_yfit, stepa_fr, stepa_sf, stepa_rwp
+                    )
+                    step_a_status = "accepted"
+                else:
+                    step_a_status = "retained previous best"
+                rwp_trend_history.append(r_best)
+                print(f"✅ StepA 完成：Rwp={r_best:.2f}% | score={best_score:.2f} | {step_a_status}")
 
-
-                current_step = "StepA"
-
-                if stg["name"] == "粗调 (Stage 1)":
-                    print(f"{stg['name']} StepB：化学计量修正（λ_stoich={lambda_stoich})")
-                    reset_profile_cache(f"{stg['name']}-before-StepB")   # ✅ 新增：Loop-B / StepB 前清缓存
-                    best_score, yfit, fr, sf, r_best, _ = inner_once(
+                if stg["name"] == "粗调 (Stage 1)" and lambda_stoich > 0.0:
+                    print(f"{stg['name']} StepB：化学计量诊断（λ_stoich={lambda_stoich})")
+                    reset_profile_cache(f"{stg['name']}-before-StepB")
+                    fit_baseline = (best_score, yfit, fr, sf, r_best)
+                    stepb_score, _, _, _, stepb_rwp, _ = inner_once(
                         phase_structs, tpars, po_r,
                         freeze_scale=False,
                         stage_name=f"{stg['name']}-StepB",
                         lambda_stoich=lambda_stoich
                     )
-                    print(f"✅ StepB 完成：Rwp={r_best:.2f}% | score={best_score:.2f}")
-
+                    # torch_refine currently does not persist its inner logits/scales.
+                    # Keep StepB as a diagnostic and restore the pure-fit baseline so
+                    # the first RL reward compares identical objectives.
+                    best_score, yfit, fr, sf, r_best = fit_baseline
+                    rwp_trend_history.append(r_best)
+                    print(f"✅ StepB 诊断完成：Rwp={stepb_rwp:.2f}% | stoich score={stepb_score:.2f} | "
+                          f"RL 继续使用 pure-fit baseline Rwp={r_best:.2f}%")
                 else:
-                    print(f"⛔ 跳过 {stg['name']} 的 StepB（避免破坏结构）")
+                    print(f"⛔ 跳过 {stg['name']} 的 StepB")
 
-                current_step = "StepB"
                 # 阶段步长
                 cell_step  = init_cell_step_frac * stg["cell_scale"]
                 angle_step = init_angle_step_deg  * stg["angle_scale"]
@@ -1065,35 +1143,73 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                 pos_step   = init_pos_step        * stg["pos_scale"]
                 mix_step   = init_mix_step        * stg["mix_scale"]
                 po_step    = init_po_step_frac    * stg["po_scale"]
+                uiso_step, min_uiso_step = 0.01, 0.001
+
+                def get_valid_actions():
+                    valid = []
+                    if cell_step >= min_cell_step_frac:
+                        valid.append(0)
+                    if angle_step >= min_angle_step_deg:
+                        valid.append(1)
+                    if tch_step >= min_tch_step_frac:
+                        valid.append(2)
+                    if enable_po and po_step >= min_po_step_frac:
+                        valid.append(3)
+                    if pos_step >= min_pos_step and any(st.sites for st in phase_structs.values()):
+                        valid.append(4)
+                    if uiso_step >= min_uiso_step and any(st.sites for st in phase_structs.values()):
+                        valid.append(5)
+                    has_mixed_sites = any(
+                        len(site.species) > 1
+                        or sum(float(occ) for occ in site.species.values()) < 1.0 - 1e-8
+                        for st in phase_structs.values() for site in st.sites
+                    )
+                    if mix_step >= min_mix_step and has_mixed_sites:
+                        valid.append(6)
+                    return valid
+
+                # Resolve the preceding stage's last action against the actual
+                # post-StepA state and the reset step mask of this stage.
+                if pending_transition is not None:
+                    learn_transition(
+                        pending_transition,
+                        get_refine_state(),
+                        get_valid_actions(),
+                    )
+                    pending_transition = None
 
                 # =========================
-                # A) 先优化 Cell + Angles + TCH + PO(r)
+                # Every action produces exactly one Q-learning transition.
                 # =========================
                 for loop in range(1, stg["loops"] + 1):
-                    # 获取当前状态
                     current_state = get_refine_state()
-                    # 让 Agent 选择一个动作 (0-6)
-                    action_selected = agent.choose_action(current_state)
+                    valid_actions = get_valid_actions()
+                    if not valid_actions:
+                        print(f"[{stg['name']}] 所有有效动作的步长均已达下限，提前结束本阶段。")
+                        break
+                    action_selected = agent.choose_action(
+                        current_state, valid_actions=valid_actions
+                    )
 
-                    # 记录动作执行前的分数，用于计算 Reward
+                    # All RL transitions use pure Rwp as their consistent score.
                     score_before = best_score
+                    rwp_before = r_best
 
                     loop_label = f"RL-Action:{action_selected}"
                     improved = False
 
-                    # 打印一下当前的决策，方便监控
                     if loop % 10 == 0:
-                        print(f"--- [RL Decision] Loop {loop} | State: {current_state} | Chosen Action: {action_selected} ---")
-                    loop_label = current_step if 'current_step' in locals() else ''
-                    improved = False
+                        print(f"--- [RL Decision] {stg['name']} Loop {loop} | State: {current_state} | "
+                              f"Valid: {valid_actions} | Chosen Action: {action_selected} ---")
 
                     # Action 0: --- Cell (a,b,c)
                     if action_selected == 0:
                         if cell_step >= min_cell_step_frac:
                             for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
-                                a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
                                 for p_name in ("a","b","c"):
+                                    # Refresh after an accepted coordinate so later axes accumulate.
+                                    st0 = phase_structs[key]
+                                    a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
                                     best_local = (best_score, 0.0); best_state=None; best_metrics=None
                                     for sgn in (-1.0, +1.0):
                                         delta = sgn*cell_step
@@ -1118,9 +1234,10 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     elif action_selected == 1:
                         if angle_step >= min_angle_step_deg:
                             for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
-                                a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
                                 for p_name in ("alpha","beta","gamma"):
+                                    # Refresh after an accepted angle so later axes accumulate.
+                                    st0 = phase_structs[key]
+                                    a0,b0,c0,al0,be0,ga0 = get_cell_params(st0)
                                     best_local=(best_score,0.0); best_state=None; best_metrics=None
                                     for sgn in (-1.0,+1.0):
                                         delta = sgn*angle_step
@@ -1200,23 +1317,13 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     elif action_selected == 4:
                         if pos_step >= min_pos_step:
                             for key in list(phase_structs.keys()):
-                                st0 = phase_structs[key]
-                                # 粗调：使用初始化时冻结的 Wyckoff 分组，严格跟随原空间群
-                                if stg["name"] == "粗调 (Stage 1)":
-                                    groups = fixed_groups_map[key]
-                                # # 精调：打开硬分组，按当前结构重新分组（甚至可以改成每个原子一组）
-                                # elif stg["name"] == "精调 (Stage 3)":
-                                #     # 方案 A：按当前结构重新用 SpacegroupAnalyzer 分组（可能接近 P1）
-
-                                #     # 👉 如果你想“完全每个原子单独调”，可以改成下面这一行：
-                                #     groups = fixed_groups_map[key]
-                                #     #groups = [[i] for i in range(len(st0.sites))]
-                                # # 微调（Stage 2）：保持固定分组
-                                # else:
-                                #     #groups = groups = get_equivalent_groups(st0)
-                                #     groups = fixed_groups_map[key]
+                                # Action 4 never regroups: Stage 1/2/3 all reuse
+                                # the Wyckoff groups frozen once from the initial CIF.
+                                groups = fixed_groups_map[key]
                                 for gidx, group in enumerate(groups):
                                     for axis, vec in zip(("x","y","z"), [(1,0,0),(0,1,0),(0,0,1)]):
+                                        # Accumulate accepted shifts while keeping the original groups.
+                                        st0 = phase_structs[key]
                                         best_local=(best_score,0.0); best_state=None; best_metrics=None
                                         for sgn in (-1.0,+1.0):
                                             delta = sgn*pos_step
@@ -1250,7 +1357,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
 
                         if do_uiso:
                             # ⚠️ 原来 u_step = pos_step * 0.5 在粗调早期太大，容易试探失败还不输出
-                            u_step = 0.01
+                            u_step = uiso_step
                             min_u = 0.01
                             max_u = 1.0
 
@@ -1313,24 +1420,32 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                             for key in list(phase_structs.keys()):
                                 st0 = phase_structs[key]
 
-                                # 与 xyz 一致：决定本阶段用哪种分组
+                                # Occupancy grouping is independent from Action 4:
+                                # fixed in Stage 1, current symmetry in Stage 2,
+                                # and individual sites in Stage 3.
                                 if stg["name"] == "粗调 (Stage 1)":
-                                    groups = fixed_groups_map[key]  # 冻结的 Wyckoff orbit
+                                    groups = fixed_groups_map[key]
                                 elif stg["name"] == "精调 (Stage 3)":
-                                    groups = [[i] for i in range(len(st0.sites))]  # 你现在 Stage3 xyz 也是这样做的
+                                    groups = [[i] for i in range(len(st0.sites))]
                                 else:
-                                    groups = get_equivalent_groups(st0)  # 或者你也可以改成 fixed_groups_map[key] 更“硬”
+                                    groups = get_equivalent_groups(st0)
 
                                 for gidx, group in enumerate(groups):
+                                    st0 = phase_structs[key]
                                     if not is_mixed_group(st0, group):
                                         continue
 
                                     rep = group[0]
                                     occ0 = normalize_with_vac(get_site_occ_dict(st0.sites[rep]))
-                                    elems = list(occ0.keys())  # 含 Vac
+                                    # Vac is derived by normalization; selecting it directly
+                                    # was a no-op because it was immediately discarded below.
+                                    elems = [elem for elem in occ0.keys() if elem != "Vac"]
 
                                     for e in elems:
-                                        cands = [("Vac", +mix_step), ("Vac", -mix_step)] if e == "Vac" else [(e, +mix_step), (e, -mix_step)]
+                                        # Re-read current occupancy after any accepted previous element.
+                                        st0 = phase_structs[key]
+                                        occ0 = normalize_with_vac(get_site_occ_dict(st0.sites[rep]))
+                                        cands = [(e, +mix_step), (e, -mix_step)]
                                         best_local = (best_score, None)
                                         best_state = None
 
@@ -1363,47 +1478,70 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                                             print(f"[{stg['name']} | B-Loop {loop:03d}] ✅ mix {os.path.basename(key)} "
                                                 f"group#{gidx} sites={group} {elem} {stepval:+.3f} → Rwp={r_best:.2f}% "
                                                 f"occ={{ {occ_str} }} | pos_step={pos_step:.4f} mix_step={mix_step:.3f}")
-                # =====================================================
-                # 【RL 植入】3. 计算 Reward 并让 Agent 学习
-                # =====================================================
-                # 奖励函数设计：
-                # 1. 进步奖：分数下降（Rwp减小）越多，奖励越高
-                # 2. 惩罚：如果没有进步，给一个负分
-                # 3. 步数惩罚：每走一步扣 0.01 分，鼓励 Agent 寻找最快路径
-                score_after = best_score
-                reward = (score_before - score_after) * 10.0 - 0.01
-                if not improved:
-                    reward = -0.5  # 选错了动作，没效果，重罚
+                    # =====================================================
+                    # Reward/transition are created in every loop; only a stage-boundary
+                    # bootstrap is deferred until the real next state/mask is available.
+                    # =====================================================
+                    score_after = best_score
+                    reward = (score_before - score_after) * 10.0 - 0.01
+                    if not improved:
+                        reward = -0.5
 
-                # 更新历史和状态
-                rwp_trend_history.append(best_score)
-                next_state = get_refine_state()
+                    # A failed action only shrinks its own physical step.
+                    if not improved:
+                        did_decay = True
+                        if action_selected == 0:
+                            cell_step *= 0.8
+                        elif action_selected == 1:
+                            angle_step *= 0.8
+                        elif action_selected == 2:
+                            tch_step *= 0.8
+                        elif action_selected == 3:
+                            po_step *= 0.8
+                        elif action_selected == 4:
+                            pos_step *= 0.8
+                        elif action_selected == 5:
+                            uiso_step *= 0.8
+                        elif action_selected == 6:
+                            mix_step *= 0.8
+                        else:
+                            did_decay = False
+                        if did_decay:
+                            print(f"--- [Decay] 动作 {action_selected} 尝试失败，仅缩小该动作步长 ---")
 
-                # 喂给 Agent 学习
-                agent.learn(current_state, action_selected, reward, next_state)
-
-                # 限制历史记录长度，防止占用过多内存
-                if len(rwp_trend_history) > 20:
-                    rwp_trend_history.pop(0)
-
-                # =====================================================
-                # 【物理策略补全】4. 全局步长衰减
-                # =====================================================
-                if not improved:
-                    did_decay = False
-                    # 当某个动作没能带来提升时，我们按比例缩小所有物理参数的尝试范围
-                    if cell_step  >= min_cell_step_frac: cell_step  *= 0.8; did_decay = True
-                    if angle_step >= min_angle_step_deg: angle_step *= 0.8; did_decay = True
-                    if tch_step   >= min_tch_step_frac:  tch_step   *= 0.8; did_decay = True
-                    if po_step    >= min_po_step_frac:   po_step    *= 0.8; did_decay = True
-                    if pos_step   >= min_pos_step:       pos_step   *= 0.8; did_decay = True
-                    if mix_step   >= min_mix_step:       mix_step   *= 0.8; did_decay = True
-
-                    if did_decay:
-                        print(f"--- [Decay] 动作 {action_selected} 尝试失败，步长已缩小（目前 cell_step: {cell_step:.5f}） ---")
+                    rwp_trend_history.append(r_best)
+                    if len(rwp_trend_history) > 20:
+                        rwp_trend_history.pop(0)
+                    remaining_actions = get_valid_actions()
+                    stage_exhausted = not remaining_actions
+                    is_stage_boundary = loop == stg["loops"] or stage_exhausted
+                    is_final_transition = (
+                        stg_index == len(stage_settings) - 1 and is_stage_boundary
+                    )
+                    transition = {
+                        "stage": stg["name"],
+                        "loop": loop,
+                        "state": current_state,
+                        "valid_actions": ";".join(map(str, valid_actions)),
+                        "action": action_selected,
+                        "rwp_before": float(rwp_before),
+                        "rwp_after": float(r_best),
+                        "score_before": float(score_before),
+                        "score_after": float(score_after),
+                        "reward": float(reward),
+                        "accepted": bool(improved),
+                    }
+                    if is_stage_boundary and not is_final_transition:
+                        # StepA and the physical steps change at a stage boundary.
+                        # Defer this one bootstrap until the real next state/mask exists.
+                        pending_transition = transition
                     else:
-                        print(f"[{stg['name']} | Loop {loop:03d}] ⛳ 所有物理步长已达极限。")
-                # =====================================================
+                        next_state = "terminal" if is_final_transition else get_refine_state()
+                        next_valid_actions = None if is_final_transition else remaining_actions
+                        learn_transition(transition, next_state, next_valid_actions)
+                    if stage_exhausted:
+                        print(f"[{stg['name']}] 所有动作步长均已达下限，进入下一阶段。")
+                        break
 
             # ==========================================================
             # 生成 refine 日志曲线
@@ -1412,12 +1550,25 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             import numpy as np
 
             # ----- 导出 CSV -----
-            with open("refine_log.csv", "w", newline="") as f:
+            with open("refine_log.csv", "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow(["index","Rwp","step","frac","scale"])
-                for i,(r,st,frv,scv) in enumerate(zip(RWP_LOG,STEP_LOG,FRAC_LOG,SCALE_LOG)):
-                    writer.writerow([i,r,st,frv,scv])
-            print("📁 已生成 refine_log.csv")
+                writer.writerow(["index", "Rwp", "score", "step", "frac", "scale"])
+                for i, (rwp, score, step, frv, scv) in enumerate(
+                    zip(RWP_LOG, SCORE_LOG, STEP_LOG, FRAC_LOG, SCALE_LOG)
+                ):
+                    writer.writerow([i, rwp, score, step, frv, scv])
+            print("📁 已生成 refine_log.csv（Rwp 与 score 分列）")
+
+            trajectory_fields = [
+                "stage", "loop", "state", "valid_actions", "action",
+                "rwp_before", "rwp_after", "score_before", "score_after",
+                "reward", "accepted", "next_state", "q_before", "q_after",
+            ]
+            with open("rl_trajectory.csv", "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=trajectory_fields)
+                writer.writeheader()
+                writer.writerows(RL_TRAJECTORY_LOG)
+            print(f"📁 已生成 rl_trajectory.csv（{len(RL_TRAJECTORY_LOG)} 次 Q-learning 更新）")
 
             # ----- Rwp 曲线 -----
             plt.figure(figsize=(10,5))
@@ -1427,6 +1578,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             plt.title("Rwp Evolution")
             plt.grid(True)
             plt.savefig("Rwp_curve.png", dpi=200)
+            plt.close()
             print("📈 已保存 Rwp_curve.png")
 
             # ----- 相分数曲线 -----
@@ -1438,6 +1590,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             plt.grid(True)
             plt.title("Phase Fraction Evolution")
             plt.savefig("phase_fraction_curve.png", dpi=200)
+            plt.close()
             print("📈 已保存 phase_fraction_curve.png")
 
             # ----- scale 曲线 -----
@@ -1449,6 +1602,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             plt.grid(True)
             plt.title("Scale Evolution")
             plt.savefig("scale_curve.png", dpi=200)
+            plt.close()
             print("📈 已保存 scale_curve.png")
 
             # ✅ 最终结果直接使用最后一次循环得到的结果（不再重新计算 Rwp）
@@ -1492,13 +1646,22 @@ def main(
     po_r_init_user: Optional[Dict[str, float]] = None,
     # stoichiometry
     lambda_stoich=0.5,
-    stoich_phase="Li6PS5Cl.cif",
+    stoich_phase=None,
     stoich_target: Optional[Dict[str,float]] = None,
     # 并行进程数
     num_workers: int = os.cpu_count(),
     #组合过程中的主相偏置
     main_bias: float=1.0,
 ):
+    if not main_cif:
+        raise ValueError("main_cif must be provided")
+    if len(stage_loops) != 3 or any(int(count) <= 0 for count in stage_loops):
+        raise ValueError("stage_loops must contain three positive integers")
+    stage_loops = tuple(int(count) for count in stage_loops)
+    if num_workers is None or int(num_workers) < 1:
+        raise ValueError("num_workers must be at least 1")
+    num_workers = int(num_workers)
+
     # 0) 读实验谱
     if xy_file is None:
         xy_files = [f for f in os.listdir(".") if f.lower().endswith(".xy")]
@@ -1535,6 +1698,7 @@ def main(
         # 初筛无需PO以避免提前偏置
         prof = synth_profile_po(x, st, wl=wavelength, U=U0,V=V0,W=W0,X=X0,Y=Y0, broad_base=broad_base, enable_po=False)
         c = np.corrcoef(y, prof)[0,1]
+        c = float(c) if np.isfinite(c) else float("-inf")
         cands.append((f, prof, c))
     cands.sort(key=lambda z:z[2], reverse=True)
     top = cands[:max_candidates]
@@ -1579,22 +1743,34 @@ def main(
     phase_structs = {f: Structure.from_file(f) for f in best["files"]}
     tch_dict = {"U":U0, "V":V0, "W":W0, "X":X0, "Y":Y0}
 
-    # PO 初值
+    def resolve_phase_key(requested, *, required=False):
+        if requested is None:
+            return None
+        requested_base = os.path.basename(requested)
+        matches = [key for key in phase_structs if key == requested or os.path.basename(key) == requested_base]
+        if not matches and required:
+            raise ValueError(f"phase {requested!r} is not present in the selected mixture")
+        return matches[0] if matches else None
+
+    # PO 初值; accept either full paths or CIF basenames from callers.
     po_axes = {k: (0,0,1) for k in phase_structs.keys()}
     if po_axes_user:
-        for k,v in po_axes_user.items():
-            if k in po_axes: po_axes[k] = tuple(v)
+        for k, value in po_axes_user.items():
+            matched = resolve_phase_key(k)
+            if matched is not None:
+                po_axes[matched] = tuple(value)
     po_r_init = {k: 1.0 for k in phase_structs.keys()}
     if po_r_init_user:
-        for k,v in po_r_init_user.items():
-            if k in po_r_init: po_r_init[k] = float(v)
+        for k, value in po_r_init_user.items():
+            matched = resolve_phase_key(k)
+            if matched is not None:
+                po_r_init[matched] = float(value)
 
-    # 若未指定目标计量，默认以主相初始 CIF 的配比为目标
+    # Respect an explicitly requested stoichiometry phase; default to the main CIF.
+    stoich_phase = resolve_phase_key(stoich_phase or main_cif, required=True)
     if stoich_target is None:
-        comp = phase_structs.get(stoich_phase, st_main).composition.get_el_amt_dict()
+        comp = phase_structs[stoich_phase].composition.get_el_amt_dict()
         stoich_target = {k: float(v) for k, v in comp.items() if v > 1e-6}
-        # ✅ 统一主相识别为文件名，防止路径不同导致匹配错误
-    stoich_phase = os.path.basename(main_cif)
     refined_structs, tch_final, profiles, yfit_final, fr_final, sf_final, \
         rwp_final, po_r_final, po_axes_final = outer_refine_all(
         x_grid=x, y_obs=y, phase_structs=phase_structs, tch_params=tch_dict,
@@ -1636,6 +1812,7 @@ def main(
     plt.legend()
     plt.tight_layout(rect=[0, 0, 0.8, 1])  # 留出右侧空间
     plt.savefig("yfsf_Refined.png", dpi=300)
+    plt.close()
     print("🖼️ 拟合图已保存：yfsf_Refined.png")
 
     # ✅ 生成拟合曲线的 .xy 文件
@@ -1759,6 +1936,8 @@ def main(
                 f.writelines(final_lines)
 
         write_cif_with_uiso(struct, out_path)
+        with open("yfsf_Refined.txt", "a", encoding="utf-8") as fw:
+            fw.write(f"  {out_path}\n")
         print(f"💾 已成功导出修复后的 CIF: {out_path}")
 
     print("\n📈 最终指标：Rwp = {:.2f}% ".format(rwp_final))
@@ -1772,34 +1951,40 @@ def main(
             rfin = po_r_final.get(f, 1.0)
             print(f"   {os.path.basename(f):<28s} axis=[{axis[0]},{axis[1]},{axis[2]}] | r={rfin:.4f}")
 
-if __name__ == "__main__":
+def cli_main(argv=None):
+    """Command-line entry point imported normally so worker functions stay pickleable."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--xy", type=str, help="实验谱文件 (.xy)")
-    parser.add_argument("--main", type=str, help="主相 CIF 文件")
-    parser.add_argument("--imp", type=str, help="杂相目录")
-    # --- 新增波长输入框 ---
+    parser.add_argument("--main", type=str, default="Li6PS5Cl.cif", help="主相 CIF 文件")
+    parser.add_argument("--imp", type=str, default="impure_phase", help="杂相目录")
     parser.add_argument("--wl", type=float, default=1.5406, help="X-ray 波长 (Angstrom)")
-    parser.add_argument("--num-workers", type=int, default=os.cpu_count(), help="并行进程数")
+    parser.add_argument("--num-workers", type=int, default=os.cpu_count() or 1, help="并行进程数")
+    parser.add_argument("--stage-loops", type=int, nargs=3, metavar=("STAGE1", "STAGE2", "STAGE3"),
+                        default=(60, 100, 150), help="三个连续 RL 阶段的循环次数")
     parser.add_argument("--main-bias", type=float, default=1.0,
-                    help="主相偏置系数 (仅影响相组合筛选阶段)")
+                        help="主相偏置系数 (仅影响相组合筛选阶段)")
     parser.add_argument("--stoich-phase", type=str, default=None,
                         help="指定化学计量约束参考相 (通常与主相相同)")
     parser.add_argument("--stoich", type=str, default=None,
                         help='目标化学计量比，例如 "Li:6,S:5,P:1,Cl:1"')
     parser.add_argument("--lambda-stoich", type=float, default=0.5,
                         help="化学计量约束强度 λ_stoich (默认 0.5)")
-    args = parser.parse_args()
-    main(
+    args = parser.parse_args(argv)
+    return main(
         xy_file=args.xy,
         main_cif=args.main,
         imp_dir=args.imp,
         main_bias=args.main_bias,
-        # --- 将解析到的波长传给 main 函数 ---
         wavelength=args.wl,
         num_workers=args.num_workers,
+        stage_loops=tuple(args.stage_loops),
         stoich_phase=args.stoich_phase,
         stoich_target=None if args.stoich is None else {
             k: float(v) for k, v in (pair.split(":") for pair in args.stoich.split(","))
         },
-        lambda_stoich=args.lambda_stoich
-        )
+        lambda_stoich=args.lambda_stoich,
+    )
+
+
+if __name__ == "__main__":
+    cli_main()

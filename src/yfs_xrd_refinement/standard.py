@@ -1496,30 +1496,41 @@ def main(
             rfin = po_r_final.get(f, 1.0)
             print(f"   {os.path.basename(f):<28s} axis=[{axis[0]},{axis[1]},{axis[2]}] | r={rfin:.4f}")
 
-if __name__ == "__main__":
+
+def cli_main(argv=None):
+    """Command-line entry point imported normally so worker functions stay pickleable."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--xy", type=str, help="实验谱文件 (.xy)")
-    parser.add_argument("--main", type=str, help="主相 CIF 文件")
-    parser.add_argument("--imp", type=str, help="杂相目录")
-    parser.add_argument("--num-workers", type=int, default=os.cpu_count(), help="并行进程数")
+    parser.add_argument("--main", type=str, default="Li6PS5Cl.cif", help="主相 CIF 文件")
+    parser.add_argument("--imp", type=str, default="impure_phase", help="杂相目录")
+    parser.add_argument("--wl", type=float, default=1.5406, help="X-ray 波长 (Angstrom)")
+    parser.add_argument("--num-workers", type=int, default=os.cpu_count() or 1, help="并行进程数")
+    parser.add_argument("--stage-loops", type=int, nargs=3, metavar=("STAGE1", "STAGE2", "STAGE3"),
+                        default=(60, 100, 150), help="三个精修阶段的循环次数")
     parser.add_argument("--main-bias", type=float, default=1.0,
-                    help="主相偏置系数 (仅影响相组合筛选阶段)")
+                        help="主相偏置系数 (仅影响相组合筛选阶段)")
     parser.add_argument("--stoich-phase", type=str, default=None,
                         help="指定化学计量约束参考相 (通常与主相相同)")
     parser.add_argument("--stoich", type=str, default=None,
                         help='目标化学计量比，例如 "Li:6,S:5,P:1,Cl:1"')
     parser.add_argument("--lambda-stoich", type=float, default=0.5,
                         help="化学计量约束强度 λ_stoich (默认 0.5)")
-    args = parser.parse_args()
-    main(
-        xy_file=args.xy, 
-        main_cif=args.main, 
-        imp_dir=args.imp, 
+    args = parser.parse_args(argv)
+    return main(
+        xy_file=args.xy,
+        main_cif=args.main,
+        imp_dir=args.imp,
+        wavelength=args.wl,
+        stage_loops=tuple(args.stage_loops),
         main_bias=args.main_bias,
         num_workers=args.num_workers,
         stoich_phase=args.stoich_phase,
         stoich_target=None if args.stoich is None else {
             k: float(v) for k, v in (pair.split(":") for pair in args.stoich.split(","))
         },
-        lambda_stoich=args.lambda_stoich
-        )
+        lambda_stoich=args.lambda_stoich,
+    )
+
+
+if __name__ == "__main__":
+    cli_main()

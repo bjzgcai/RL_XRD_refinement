@@ -30,10 +30,20 @@ class StaticSmokeTests(unittest.TestCase):
         self.assertIn('[project.scripts]', text)
         self.assertIn('yfs-xrd-refine', text)
 
+    def test_wrappers_import_modules_normally_for_multiprocessing(self):
+        for filename in ("yfs_XRD.py", "QL_yfs_XRD.py", "parallel_batch_refine.py"):
+            source = (ROOT / filename).read_text(encoding="utf-8")
+            self.assertNotIn("runpy", source)
+        cli_source = (ROOT / "src" / "yfs_xrd_refinement" / "cli.py").read_text(encoding="utf-8")
+        self.assertNotIn("runpy", cli_source)
+        self.assertIn("from .qlearning import cli_main", cli_source)
+
     def test_batch_runner_keeps_shell_disabled(self):
         source = (ROOT / "src" / "yfs_xrd_refinement" / "batch.py").read_text(encoding="utf-8")
         self.assertIn("subprocess.run", source)
         self.assertNotIn("shell=True", source)
+        self.assertIn('parser.add_argument("--refiner", default=None', source)
+        self.assertIn('child_env["PYTHONPATH"]', source)
 
 
     def test_qlearning_runs_three_stages_with_active_updates(self):
@@ -42,8 +52,9 @@ class StaticSmokeTests(unittest.TestCase):
         self.assertIn("\"微调 (Stage 2)\"", source)
         self.assertIn("\"精调 (Stage 3)\"", source)
         self.assertNotIn("stage_settings = stage_settings[:1]", source)
-        self.assertIn("agent.choose_action(current_state)", source)
-        self.assertIn("agent.learn(current_state, action_selected, reward, next_state)", source)
+        self.assertIn("valid_actions=valid_actions", source)
+        self.assertIn("next_valid_actions=next_valid_actions", source)
+        self.assertIn('with open("rl_trajectory.csv"', source)
         self.assertIn("e, l2 = 250, 0.30", source)
         self.assertIn("e, l2 = 200, 0.30", source)
         self.assertIn("e, l2 = 150, 0.25", source)

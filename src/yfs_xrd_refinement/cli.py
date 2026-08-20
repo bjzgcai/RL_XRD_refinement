@@ -3,22 +3,17 @@
 
 from __future__ import annotations
 
-import runpy
-import sys
-
-
-def _run_module(module_name: str) -> None:
-    sys.argv[0] = module_name
-    runpy.run_module(module_name, run_name="__main__")
-
 
 def standard() -> None:
-    _run_module("yfs_xrd_refinement.standard")
+    from .standard import cli_main
+    cli_main()
 
 
 def qlearning() -> None:
-    _run_module("yfs_xrd_refinement.qlearning")
+    from .qlearning import cli_main
+    cli_main()
 
 
 def batch() -> None:
-    _run_module("yfs_xrd_refinement.batch")
+    from .batch import main
+    main()
