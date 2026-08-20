@@ -3,7 +3,7 @@
 # QL-yfsf.py
 # ============================================
 
-import os, itertools, re, hashlib
+import os, itertools, re, hashlib, json, random
 import numpy as np
 import torch
 import matplotlib
@@ -106,13 +106,15 @@ FRAC_LOG = []
 SCALE_LOG = []
 STEP_LOG = []
 RL_TRAJECTORY_LOG = []
+STOICH_PENALTY_LOG = []
 
-def push_log(stage_name, rwp, fr, sf, score=None):
+def push_log(stage_name, rwp, fr, sf, score=None, stoich_penalty=0.0):
     RWP_LOG.append(float(rwp))
     SCORE_LOG.append(float(rwp if score is None else score))
     FRAC_LOG.append([float(x) for x in fr])
     SCALE_LOG.append([float(x) for x in sf])
     STEP_LOG.append(stage_name)
+    STOICH_PENALTY_LOG.append(float(stoich_penalty))
 
 # =========================================
 _ALT_EARLY_STOP_PATIENCE = 50   # 连续多少次无提升提前停止
@@ -739,6 +741,58 @@ def stoich_penalty_for_phase(struct: Structure, target: Dict[str, float]) -> flo
     diff = cvec - tvec
     return float(np.dot(diff, diff))  # L2^2
 
+
+def strict_stoich_penalty_for_phase(
+    struct: Structure, target: Dict[str, float]
+) -> float:
+    """L2-squared deviation on the union of actual and target elements."""
+    actual = {
+        key: float(value)
+        for key, value in struct.composition.get_el_amt_dict().items()
+        if float(value) > 0.0
+    }
+    keys = sorted(set(actual) | set(target))
+    target_vec = np.asarray([float(target.get(key, 0.0)) for key in keys], dtype=float)
+    actual_vec = np.asarray([float(actual.get(key, 0.0)) for key in keys], dtype=float)
+    if (
+        not keys
+        or not np.all(np.isfinite(target_vec))
+        or np.any(target_vec < 0.0)
+        or float(target_vec.sum()) <= 0.0
+    ):
+        raise ValueError(
+            "stoich target must contain finite non-negative values with positive sum"
+        )
+    if float(actual_vec.sum()) <= 0.0:
+        raise ValueError("stoichiometry phase has no positive elemental composition")
+    if not np.all(np.isfinite(actual_vec)) or np.any(actual_vec < 0.0):
+        raise ValueError("stoichiometry phase composition must be finite and non-negative")
+    target_vec /= target_vec.sum()
+    actual_vec /= actual_vec.sum()
+    diff = actual_vec - target_vec
+    return float(np.dot(diff, diff))
+
+
+def compose_occupancy_objective(
+    rwp_percent: float,
+    composition_penalty: float,
+    lambda_stoich: float,
+    mode: str = "rwp",
+) -> float:
+    """Return a common percentage-scale objective for every outer trial."""
+    if mode not in {"rwp", "stoich"}:
+        raise ValueError("occupancy objective must be 'rwp' or 'stoich'")
+    values = np.asarray(
+        [rwp_percent, composition_penalty, lambda_stoich], dtype=float
+    )
+    if not np.all(np.isfinite(values)):
+        raise ValueError("Rwp, lambda, and composition penalty must be finite")
+    if lambda_stoich < 0.0 or composition_penalty < 0.0:
+        raise ValueError("lambda and composition penalty must be non-negative")
+    if mode == "rwp":
+        return float(rwp_percent)
+    return float(rwp_percent + 100.0 * lambda_stoich * composition_penalty)
+
 # -----------------------------
 # 外层：三阶段（粗→微→精）；加入 PO(r) 优化
 # -----------------------------
@@ -767,10 +821,12 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                      lambda_stoich=0.0,
                      stoich_phase_key: Optional[str]=None,
                      stoich_target: Optional[Dict[str, float]]=None,
+                     occupancy_objective: str="rwp",
                      # stage loops
                      stage_loops=(60, 100, 150),
                      device=None,
-                     num_workers: int = os.cpu_count()):
+                     num_workers: int = os.cpu_count(),
+                     seed: int = 20260820):
 
 
     import numpy as np
@@ -795,12 +851,27 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             raise ValueError(f"stoichiometry phase {stoich_phase_key!r} is not in phase_structs")
     if lambda_stoich < 0.0:
         raise ValueError("lambda_stoich must be non-negative")
+    if occupancy_objective not in {"rwp", "stoich"}:
+        raise ValueError("occupancy_objective must be 'rwp' or 'stoich'")
+    if occupancy_objective == "stoich":
+        if lambda_stoich <= 0.0:
+            raise ValueError("stoich occupancy objective requires lambda_stoich > 0")
+        if stoich_phase_key is None or not stoich_target:
+            raise ValueError(
+                "stoich occupancy objective requires stoich_phase_key and explicit target"
+            )
+        # Validate the target before starting any expensive refinement work.
+        strict_stoich_penalty_for_phase(phase_structs[stoich_phase_key], stoich_target)
+    seed = int(seed)
     if po_axes is not None:
         po_axes = {os.path.basename(key): value for key, value in po_axes.items()}
     if po_r_init is not None:
         po_r_init = {os.path.basename(key): value for key, value in po_r_init.items()}
 
-    for log in (RWP_LOG, SCORE_LOG, FRAC_LOG, SCALE_LOG, STEP_LOG, RL_TRAJECTORY_LOG):
+    for log in (
+        RWP_LOG, SCORE_LOG, FRAC_LOG, SCALE_LOG, STEP_LOG,
+        RL_TRAJECTORY_LOG, STOICH_PENALTY_LOG,
+    ):
         log.clear()
     # === 冻结 Wyckoff 分组：只按初始 CIF 计算一次，三个 Stage 始终复用 ===
     fixed_groups_map: Dict[str, List[List[int]]] = {}
@@ -952,7 +1023,9 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             # =====================================================
             # 动作定义：0:Cell, 1:Angle, 2:TCH, 3:PO, 4:Atoms, 5:Uiso, 6:Occ
             rl_actions = list(range(7))
-            agent = QLearningRefineAgent(actions=rl_actions)
+            agent = QLearningRefineAgent(
+                actions=rl_actions, rng=np.random.default_rng(seed)
+            )
 
             # 用于记录 Rwp 的历史，辅助 RL 判断“状态”
             rwp_trend_history = []
@@ -997,7 +1070,24 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                 })
                 RL_TRAJECTORY_LOG.append(completed)
 
-            def inner_once(structs_dict, tpars, po_r_dict, freeze_scale=False, stage_name="Stage", lambda_stoich=0.0):
+            def search_stoich_penalty(structs_dict):
+                if stoich_phase_key is None or not stoich_target:
+                    return 0.0
+                return strict_stoich_penalty_for_phase(
+                    structs_dict[stoich_phase_key], stoich_target
+                )
+
+            def inner_once(
+                structs_dict,
+                tpars,
+                po_r_dict,
+                freeze_scale=False,
+                stage_name="Stage",
+                inner_lambda_stoich=0.0,
+                evaluation_kind="search",
+            ):
+                if evaluation_kind not in {"search", "diagnostic"}:
+                    raise ValueError("evaluation_kind must be 'search' or 'diagnostic'")
 
                 # Uiso trials use the smaller budget from the original implementation.
                 if "Uiso" in stage_name:
@@ -1011,65 +1101,80 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
 
                 profiles = make_profiles(structs_dict, tpars, po_r_dict)
 
-                # 计算每相的 stoichiometric 偏差和权重
+                # The legacy Stage-1 diagnostic retains its original differentiable
+                # frac/scale-weighted term. Search trials stay pure-fit internally;
+                # their structures are compared with the strict outer objective below.
                 pen_list, alpha_list = None, None
-                if lambda_stoich > 0.0 and stoich_target:
+                if inner_lambda_stoich > 0.0 and stoich_target:
                     pen_list, alpha_list = [], []
                     for k, st in structs_dict.items():
                         pen = stoich_penalty_for_phase(st, stoich_target)
-                        is_main = (
-                    stoich_phase_key and (
-                            os.path.basename(k) == stoich_phase_key or
-                            os.path.splitext(os.path.basename(k))[0] == os.path.splitext(stoich_phase_key)[0]
+                        is_main = bool(
+                            stoich_phase_key
+                            and (
+                                os.path.basename(k) == stoich_phase_key
+                                or os.path.splitext(os.path.basename(k))[0]
+                                == os.path.splitext(stoich_phase_key)[0]
+                            )
                         )
-                    )
                         alpha = 0.1 if is_main else 0.8
                         pen_list.append(pen)
                         alpha_list.append(alpha)
 
-                # ===== 单次 refine 调用（外层控制 StepA / StepB） =====
                 yfit, fr, sf, Rwp = torch_refine(
                     y_obs, profiles, device=device, bg_degree=bg_degree,
-                    freeze_scale=freeze_scale, epochs=e, lbfgs_lr=l2, lbfgs_max_iter=50,
-                    lr=5e-3, weight_decay=1e-4,
+                    freeze_scale=freeze_scale, epochs=e, lbfgs_lr=l2,
+                    lbfgs_max_iter=50, lr=5e-3, weight_decay=1e-4,
                     main_bias=0.0,
                     stoich_penalty_per_phase=pen_list,
                     stoich_phase_weights=alpha_list,
-                    lambda_stoich=lambda_stoich,
-                    mode="fit" if lambda_stoich == 0.0 else "stoich",
+                    lambda_stoich=inner_lambda_stoich,
+                    mode="fit" if inner_lambda_stoich == 0.0 else "stoich",
                 )
 
-                # 综合评分（越小越好）
-                stoich_term = 0.0
-                if lambda_stoich > 0.0 and pen_list is not None:
-                    p = np.asarray(pen_list, dtype=float)
-                    a = np.asarray(alpha_list, dtype=float)
-                    fr_np = np.asarray(fr, dtype=float)
-                    sf_np = np.asarray(sf, dtype=float)
-                    stoich_term = float(np.sum(p * a * fr_np * sf_np))
+                composition_penalty = search_stoich_penalty(structs_dict)
+                if evaluation_kind == "search":
+                    score = compose_occupancy_objective(
+                        Rwp, composition_penalty, lambda_stoich,
+                        mode=occupancy_objective,
+                    )
+                else:
+                    stoich_term = 0.0
+                    if inner_lambda_stoich > 0.0 and pen_list is not None:
+                        p = np.asarray(pen_list, dtype=float)
+                        a = np.asarray(alpha_list, dtype=float)
+                        fr_np = np.asarray(fr, dtype=float)
+                        sf_np = np.asarray(sf, dtype=float)
+                        stoich_term = float(np.sum(p * a * fr_np * sf_np))
+                    score = _ALT_SCORE_W_DATA * Rwp + _ALT_SCORE_W_STOICH * stoich_term
 
-                score = _ALT_SCORE_W_DATA * Rwp + _ALT_SCORE_W_STOICH * stoich_term
-
-                # ====================================================
-
-                # ✅ 仅第一次打印主相识别情况
-                if lambda_stoich > 0.0 and stoich_target and not hasattr(inner_once, "_stoich_printed"):
-                    print(f"\n📘 [StoichPenalty] λ_stoich = {lambda_stoich:.3f}")
+                if (
+                    evaluation_kind == "diagnostic"
+                    and inner_lambda_stoich > 0.0
+                    and stoich_target
+                    and not hasattr(inner_once, "_stoich_printed")
+                ):
+                    print(f"\n📘 [StoichPenalty diagnostic] λ_stoich = {inner_lambda_stoich:.3f}")
                     print(f"👉 已识别主相为：{stoich_phase_key}")
-                    print("🧩 各相的化学计量约束权重：")
-                    for k, alpha in zip(structs_dict.keys(), alpha_list):
-                        is_main = (stoich_phase_key and os.path.basename(k) == os.path.basename(stoich_phase_key))
-                        tag = "主相" if is_main else "杂相"
-                        print(f"   ├─ {os.path.basename(k):<25s} | 类型: {tag:<3s} | λ_phase = {alpha*lambda_stoich:.3f}")
-                    print("-------------------------------------------------------")
-                    inner_once._stoich_printed = True  # 防止重复打印
+                    inner_once._stoich_printed = True
 
-                push_log(stage_name, Rwp, fr, sf, score=score)
+                push_log(
+                    stage_name, Rwp, fr, sf, score=score,
+                    stoich_penalty=composition_penalty,
+                )
                 return score, yfit, fr, sf, Rwp, profiles
 
             # init
             tpars = dict(tch_params)
-            best_score, yfit, fr, sf, r_best,  _ = inner_once(phase_structs, tpars, po_r, freeze_scale=False, stage_name="初始化")
+            if occupancy_objective == "stoich":
+                print(
+                    f"\n🧪 Active occupancy objective: "
+                    f"J=Rwp(%) + 100*{lambda_stoich:g}*P_target"
+                )
+            best_score, yfit, fr, sf, r_best, _ = inner_once(
+                phase_structs, tpars, po_r, freeze_scale=False,
+                stage_name="初始化",
+            )
             rwp_trend_history.append(r_best)
             print(f"\n🔁 外层精修启动：Rwp={r_best:.2f}% |  score={best_score:.2f}")
 
@@ -1098,13 +1203,20 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                 # =====================================================
                 # StepA + StepB 串行执行
                 # =====================================================
-                print(f"\n▶️ {stg['name']} StepA：结构拟合阶段（λ_stoich=0.0）")
+                if occupancy_objective == "stoich":
+                    print(
+                        f"\n▶️ {stg['name']} StepA：统一软正则评价 "
+                        f"(λ_stoich={lambda_stoich:g})"
+                    )
+                else:
+                    print(f"\n▶️ {stg['name']} StepA：结构拟合阶段（λ_stoich=0.0）")
                 reset_profile_cache(f"{stg['name']}-before-StepA")
                 stepa_score, stepa_yfit, stepa_fr, stepa_sf, stepa_rwp, _ = inner_once(
                     phase_structs, tpars, po_r,
                     freeze_scale=False,
                     stage_name=f"{stg['name']}-StepA",
-                    lambda_stoich=0.0
+                    inner_lambda_stoich=0.0,
+                    evaluation_kind="search",
                 )
                 if stepa_score <= best_score + 1e-8:
                     best_score, yfit, fr, sf, r_best = (
@@ -1116,7 +1228,11 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                 rwp_trend_history.append(r_best)
                 print(f"✅ StepA 完成：Rwp={r_best:.2f}% | score={best_score:.2f} | {step_a_status}")
 
-                if stg["name"] == "粗调 (Stage 1)" and lambda_stoich > 0.0:
+                if (
+                    occupancy_objective == "rwp"
+                    and stg["name"] == "粗调 (Stage 1)"
+                    and lambda_stoich > 0.0
+                ):
                     print(f"{stg['name']} StepB：化学计量诊断（λ_stoich={lambda_stoich})")
                     reset_profile_cache(f"{stg['name']}-before-StepB")
                     fit_baseline = (best_score, yfit, fr, sf, r_best)
@@ -1124,7 +1240,8 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                         phase_structs, tpars, po_r,
                         freeze_scale=False,
                         stage_name=f"{stg['name']}-StepB",
-                        lambda_stoich=lambda_stoich
+                        inner_lambda_stoich=lambda_stoich,
+                        evaluation_kind="diagnostic",
                     )
                     # torch_refine currently does not persist its inner logits/scales.
                     # Keep StepB as a diagnostic and restore the pure-fit baseline so
@@ -1134,7 +1251,12 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     print(f"✅ StepB 诊断完成：Rwp={stepb_rwp:.2f}% | stoich score={stepb_score:.2f} | "
                           f"RL 继续使用 pure-fit baseline Rwp={r_best:.2f}%")
                 else:
-                    print(f"⛔ 跳过 {stg['name']} 的 StepB")
+                    reason = (
+                        "soft objective already active for every trial"
+                        if occupancy_objective == "stoich"
+                        else "not scheduled"
+                    )
+                    print(f"⛔ 跳过 {stg['name']} 的 StepB ({reason})")
 
                 # 阶段步长
                 cell_step  = init_cell_step_frac * stg["cell_scale"]
@@ -1191,9 +1313,10 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                         current_state, valid_actions=valid_actions
                     )
 
-                    # All RL transitions use pure Rwp as their consistent score.
+                    # Every transition uses one consistent search objective.
                     score_before = best_score
                     rwp_before = r_best
+                    stoich_penalty_before = search_stoich_penalty(phase_structs)
 
                     loop_label = f"RL-Action:{action_selected}"
                     improved = False
@@ -1483,6 +1606,7 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                     # bootstrap is deferred until the real next state/mask is available.
                     # =====================================================
                     score_after = best_score
+                    stoich_penalty_after = search_stoich_penalty(phase_structs)
                     reward = (score_before - score_after) * 10.0 - 0.01
                     if not improved:
                         reward = -0.5
@@ -1528,6 +1652,8 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
                         "rwp_after": float(r_best),
                         "score_before": float(score_before),
                         "score_after": float(score_after),
+                        "stoich_penalty_before": float(stoich_penalty_before),
+                        "stoich_penalty_after": float(stoich_penalty_after),
                         "reward": float(reward),
                         "accepted": bool(improved),
                     }
@@ -1552,16 +1678,23 @@ def outer_refine_all(x_grid: np.ndarray, y_obs: np.ndarray,
             # ----- 导出 CSV -----
             with open("refine_log.csv", "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow(["index", "Rwp", "score", "step", "frac", "scale"])
-                for i, (rwp, score, step, frv, scv) in enumerate(
-                    zip(RWP_LOG, SCORE_LOG, STEP_LOG, FRAC_LOG, SCALE_LOG)
+                writer.writerow([
+                    "index", "Rwp", "score", "stoich_penalty",
+                    "step", "frac", "scale",
+                ])
+                for i, (rwp, score, penalty, step, frv, scv) in enumerate(
+                    zip(
+                        RWP_LOG, SCORE_LOG, STOICH_PENALTY_LOG,
+                        STEP_LOG, FRAC_LOG, SCALE_LOG,
+                    )
                 ):
-                    writer.writerow([i, rwp, score, step, frv, scv])
-            print("📁 已生成 refine_log.csv（Rwp 与 score 分列）")
+                    writer.writerow([i, rwp, score, penalty, step, frv, scv])
+            print("📁 已生成 refine_log.csv（Rwp、score 与 stoich penalty 分列）")
 
             trajectory_fields = [
                 "stage", "loop", "state", "valid_actions", "action",
                 "rwp_before", "rwp_after", "score_before", "score_after",
+                "stoich_penalty_before", "stoich_penalty_after",
                 "reward", "accepted", "next_state", "q_before", "q_after",
             ]
             with open("rl_trajectory.csv", "w", newline="", encoding="utf-8") as f:
@@ -1648,6 +1781,8 @@ def main(
     lambda_stoich=0.5,
     stoich_phase=None,
     stoich_target: Optional[Dict[str,float]] = None,
+    occupancy_objective: str="rwp",
+    seed: int=20260820,
     # 并行进程数
     num_workers: int = os.cpu_count(),
     #组合过程中的主相偏置
@@ -1655,6 +1790,19 @@ def main(
 ):
     if not main_cif:
         raise ValueError("main_cif must be provided")
+    if occupancy_objective not in {"rwp", "stoich"}:
+        raise ValueError("occupancy_objective must be 'rwp' or 'stoich'")
+    target_was_explicit = stoich_target is not None
+    if occupancy_objective == "stoich" and not target_was_explicit:
+        raise ValueError(
+            "--occupancy-objective stoich requires an explicit --stoich target"
+        )
+    seed = int(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
     if len(stage_loops) != 3 or any(int(count) <= 0 for count in stage_loops):
         raise ValueError("stage_loops must contain three positive integers")
     stage_loops = tuple(int(count) for count in stage_loops)
@@ -1783,9 +1931,10 @@ def main(
         enable_po=enable_po, po_axes=po_axes, po_r_init=po_r_init,
         init_po_step_frac=init_po_step_frac, min_po_step_frac=min_po_step_frac,
         po_r_bounds=po_r_bounds,
-        lambda_stoich=lambda_stoich, stoich_phase_key=stoich_phase, stoich_target=stoich_target,
+        lambda_stoich=lambda_stoich, stoich_phase_key=stoich_phase,
+        stoich_target=stoich_target, occupancy_objective=occupancy_objective,
         stage_loops=stage_loops, device=device,
-        num_workers=num_workers,
+        num_workers=num_workers, seed=seed,
     )
 
     # 6) 绘图（最终）
@@ -1837,6 +1986,9 @@ def main(
             rfin = po_r_final.get(f, 1.0)
             fw.write(f"  {os.path.basename(f):<28s} axis=[{axis[0]},{axis[1]},{axis[2]}] | r={rfin:.4f}\n")
         fw.write("\nStoichiometry target (phase={}): {}\n".format(stoich_phase, stoich_target))
+        fw.write(f"Stoichiometry lambda: {lambda_stoich}\n")
+        fw.write(f"Occupancy objective: {occupancy_objective}\n")
+        fw.write(f"Random seed: {seed}\n")
         fw.write("\nExported CIFs:\n")
 
     for fpath, struct in refined_structs.items():
@@ -1940,6 +2092,49 @@ def main(
             fw.write(f"  {out_path}\n")
         print(f"💾 已成功导出修复后的 CIF: {out_path}")
 
+    final_stoich_key = os.path.basename(stoich_phase)
+    final_penalty = strict_stoich_penalty_for_phase(
+        refined_structs[final_stoich_key], stoich_target
+    )
+    final_objective = compose_occupancy_objective(
+        rwp_final, final_penalty, lambda_stoich, mode=occupancy_objective
+    )
+    run_summary = {
+        "schema_version": 1,
+        "final_rwp_percent": float(rwp_final),
+        "final_search_objective": float(final_objective),
+        "final_stoich_penalty_l2_squared": float(final_penalty),
+        "lambda_stoich": float(lambda_stoich),
+        "occupancy_objective": occupancy_objective,
+        "objective_formula": (
+            "Rwp_percent + 100 * lambda_stoich * stoich_penalty_l2_squared"
+            if occupancy_objective == "stoich"
+            else "Rwp_percent"
+        ),
+        "lambda_applied_by_stage": {
+            "Stage 1": float(lambda_stoich),
+            "Stage 2": float(lambda_stoich),
+            "Stage 3": float(lambda_stoich),
+        } if occupancy_objective == "stoich" else {},
+        "stoich_phase": final_stoich_key,
+        "stoich_target": {key: float(value) for key, value in stoich_target.items()},
+        "refined_compositions": {
+            key: {
+                element: float(amount)
+                for element, amount in structure.composition.get_el_amt_dict().items()
+            }
+            for key, structure in refined_structs.items()
+        },
+        "stage_loops": [int(value) for value in stage_loops],
+        "rl_update_count": len(RL_TRAJECTORY_LOG),
+        "seed": seed,
+        "device": str(device),
+        "wavelength_angstrom": float(wavelength),
+    }
+    with open("run_summary.json", "w", encoding="utf-8") as handle:
+        json.dump(run_summary, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
+
     print("\n📈 最终指标：Rwp = {:.2f}% ".format(rwp_final))
     print("📊 相分数（softmax）与每相独立 scale：")
     for f, w, s in zip(refined_structs.keys(), fr_final, sf_final):
@@ -1969,6 +2164,18 @@ def cli_main(argv=None):
                         help='目标化学计量比，例如 "Li:6,S:5,P:1,Cl:1"')
     parser.add_argument("--lambda-stoich", type=float, default=0.5,
                         help="化学计量约束强度 λ_stoich (默认 0.5)")
+    parser.add_argument(
+        "--occupancy-objective", choices=("rwp", "stoich"), default="rwp",
+        help=(
+            "Occupancy候选目标；stoich使用 "
+            "J=Rwp(%%)+100*lambda_stoich*P_target"
+        ),
+    )
+    parser.add_argument("--seed", type=int, default=20260820, help="随机种子")
+    parser.add_argument(
+        "--single-phase", action="store_true",
+        help="只使用 --main 指定的单相，不搜索杂相",
+    )
     args = parser.parse_args(argv)
     return main(
         xy_file=args.xy,
@@ -1983,6 +2190,9 @@ def cli_main(argv=None):
             k: float(v) for k, v in (pair.split(":") for pair in args.stoich.split(","))
         },
         lambda_stoich=args.lambda_stoich,
+        occupancy_objective=args.occupancy_objective,
+        seed=args.seed,
+        single_phase=args.single_phase,
     )
 
 

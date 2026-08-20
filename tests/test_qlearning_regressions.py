@@ -93,8 +93,8 @@ def load_definitions(*names):
     return [namespace[name] for name in names]
 
 
-Agent, compose_refinement_loss = load_definitions(
-    "QLearningRefineAgent", "compose_refinement_loss"
+Agent, compose_refinement_loss, compose_occupancy_objective = load_definitions(
+    "QLearningRefineAgent", "compose_refinement_loss", "compose_occupancy_objective"
 )
 
 
@@ -260,6 +260,37 @@ class QLearningAgentTests(unittest.TestCase):
         self.assertEqual(compose_refinement_loss(10.0, 2.0, "fit", 0.5), 10.0)
         self.assertEqual(compose_refinement_loss(10.0, 2.0, "stoich", 0.5), 1.1)
         self.assertEqual(compose_refinement_loss(10.0, 2.0, "combined", 0.5), 11.0)
+
+    def test_occupancy_objective_uses_requested_lambda(self):
+        self.assertEqual(compose_occupancy_objective(12.0, 0.25, 2.0, "rwp"), 12.0)
+        self.assertEqual(compose_occupancy_objective(12.0, 0.25, 0.3, "stoich"), 19.5)
+        self.assertEqual(compose_occupancy_objective(12.0, 0.25, 1.0, "stoich"), 37.0)
+        self.assertEqual(compose_occupancy_objective(12.0, 0.25, 2.0, "stoich"), 62.0)
+
+    def test_occupancy_objective_rejects_invalid_inputs(self):
+        with self.assertRaises(ValueError):
+            compose_occupancy_objective(12.0, 0.25, -0.1, "stoich")
+        with self.assertRaises(ValueError):
+            compose_occupancy_objective(12.0, -0.01, 0.3, "stoich")
+        with self.assertRaises(ValueError):
+            compose_occupancy_objective(12.0, 0.25, 0.3, "unknown")
+        for invalid_args in (
+            (float("nan"), 0.25, 0.3),
+            (12.0, float("inf"), 0.3),
+            (12.0, 0.25, float("nan")),
+        ):
+            with self.assertRaises(ValueError):
+                compose_occupancy_objective(*invalid_args, mode="stoich")
+
+    def test_active_occupancy_cli_and_audit_fields_are_present(self):
+        for token in (
+            '"--occupancy-objective"',
+            '"--seed"',
+            '"--single-phase"',
+            '"lambda_applied_by_stage"',
+            '"final_stoich_penalty_l2_squared"',
+        ):
+            self.assertIn(token, SOURCE)
 
 
 class BatchCompletionTests(unittest.TestCase):
